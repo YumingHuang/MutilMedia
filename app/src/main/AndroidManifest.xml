@@ -22,6 +22,7 @@
         <activity android:name=".ui.activity.image.SurfaceDrawActivity" />
         <activity android:name=".ui.activity.image.CustomImgActivity" />
         <activity android:name=".ui.activity.image.Camera1Activity" />
+        <activity android:name=".ui.activity.image.LargeImageViewActivity" />
         <activity android:name=".ui.activity.audio.AudioActivity" />
         <activity android:name=".ui.activity.audio.MediaRecordActivity" />
         <activity android:name=".ui.activity.video.VideoActivity" />

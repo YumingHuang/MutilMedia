@@ -122,7 +122,7 @@ public class MediaRecordActivity extends BaseActivity implements View.OnClickLis
             //所有android系统都支持的适中采样的频率
             mMediaRecorder.setAudioSamplingRate(44100);
             //通用的AAC编码格式
-            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
             //设置音质频率
             mMediaRecorder.setAudioEncodingBitRate(96000);
             //设置文件录音的位置
