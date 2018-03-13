@@ -9,13 +9,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".ui.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".ui.activity.image.ImageActivity"/>
+        <activity android:name=".ui.activity.image.DrawImgActivity"/>
+        <activity android:name=".ui.activity.image.SurfaceDrawActivity"/>
+        <activity android:name=".ui.activity.image.CustomImgActivity"/>
     </application>
 
 </manifest>
