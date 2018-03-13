@@ -3,12 +3,13 @@ package com.example.mutilmedia.ui.activity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.example.mutilmedia.ui.activity.audio.AudioActivity;
 import com.example.mutilmedia.ui.activity.image.ImageActivity;
+import com.example.mutilmedia.ui.activity.video.VideoActivity;
 
 import java.util.ArrayList;
 
@@ -39,8 +40,10 @@ public class MainActivity extends ListActivity {
                 startActivity(new Intent(this, ImageActivity.class));
                 break;
             case 1:
+                startActivity(new Intent(this, AudioActivity.class));
                 break;
             case 2:
+                startActivity(new Intent(this, VideoActivity.class));
                 break;
             case 3:
                 break;

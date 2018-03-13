@@ -17,10 +17,16 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.activity.image.ImageActivity"/>
-        <activity android:name=".ui.activity.image.DrawImgActivity"/>
-        <activity android:name=".ui.activity.image.SurfaceDrawActivity"/>
-        <activity android:name=".ui.activity.image.CustomImgActivity"/>
+        <activity android:name=".ui.activity.image.ImageActivity" />
+        <activity android:name=".ui.activity.image.DrawImgActivity" />
+        <activity android:name=".ui.activity.image.SurfaceDrawActivity" />
+        <activity android:name=".ui.activity.image.CustomImgActivity" />
+        <activity android:name=".ui.activity.image.Camera1Activity" />
+        <activity android:name=".ui.activity.audio.AudioActivity" />
+        <activity android:name=".ui.activity.audio.MediaRecordActivity" />
+        <activity android:name=".ui.activity.video.VideoActivity" />
     </application>
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 </manifest>

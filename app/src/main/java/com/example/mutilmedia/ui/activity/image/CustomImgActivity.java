@@ -9,18 +9,18 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.example.mutilmedia.R;
+import com.example.mutilmedia.ui.activity.BaseActivity;
 
 import java.util.ArrayList;
 
 /**
  * @author huangyuming
  */
-public class CustomImgActivity extends AppCompatActivity {
+public class CustomImgActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_custom_draw);
     }
-
 }

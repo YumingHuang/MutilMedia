@@ -6,16 +6,16 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.example.mutilmedia.R;
+import com.example.mutilmedia.ui.activity.BaseActivity;
 
 /**
  * @author huangyuming
  */
-public class SurfaceDrawActivity extends AppCompatActivity implements SurfaceHolder.Callback, Runnable {
+public class SurfaceDrawActivity extends BaseActivity implements SurfaceHolder.Callback, Runnable {
     private SurfaceView mSurView;
     private SurfaceHolder mHolder;
     private Canvas mCanvas;

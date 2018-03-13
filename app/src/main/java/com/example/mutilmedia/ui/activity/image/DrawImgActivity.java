@@ -1,12 +1,15 @@
 package com.example.mutilmedia.ui.activity.image;
 
 import android.app.ListActivity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.example.mutilmedia.ui.activity.BaseActivity;
 
 import java.util.ArrayList;
 
@@ -16,12 +19,13 @@ import java.util.ArrayList;
 public class DrawImgActivity extends ListActivity {
 
     private ArrayList<String> mTaskList = new ArrayList<>();
+    private Intent mIntent = new Intent();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mTaskList.add("SurfaceView绘制");
-        mTaskList.add("自定义View绘制");
+        mTaskList.add("SurfaceView绘制图片");
+        mTaskList.add("自定义View绘制图片");
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mTaskList);
         setListAdapter(adapter);
@@ -32,10 +36,14 @@ public class DrawImgActivity extends ListActivity {
         super.onListItemClick(l, v, position, id);
         switch (position) {
             case 0:
-                startActivity(new Intent(this, SurfaceDrawActivity.class));
+                mIntent.setClass(this, SurfaceDrawActivity.class);
+                mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(0));
+                startActivity(mIntent);
                 break;
             case 1:
-                startActivity(new Intent(this, CustomImgActivity.class));
+                mIntent.setClass(this, CustomImgActivity.class);
+                mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(1));
+                startActivity(mIntent);
                 break;
             default:
                 break;
