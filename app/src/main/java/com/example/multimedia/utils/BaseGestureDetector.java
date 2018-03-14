@@ -1,4 +1,4 @@
-package com.example.mutilmedia.utils;
+package com.example.multimedia.utils;
 
 import android.content.Context;
 import android.view.MotionEvent;
@@ -24,7 +24,6 @@ public abstract class BaseGestureDetector {
         } else {
             handleInProgressEvent(event);
         }
-
         return true;
     }
 
@@ -45,6 +44,4 @@ public abstract class BaseGestureDetector {
         }
         mGestureInProgress = false;
     }
-
-
 }

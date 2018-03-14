@@ -1,4 +1,4 @@
-package com.example.mutilmedia;
+package com.example.multimedia;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

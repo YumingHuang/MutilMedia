@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.example.mutilmedia.ui.widget.SimpleImageView
+    <com.example.multimedia.ui.widget.SimpleImageView
         android:id="@+id/sp_img"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

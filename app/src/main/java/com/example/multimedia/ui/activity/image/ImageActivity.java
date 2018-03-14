@@ -1,4 +1,4 @@
-package com.example.mutilmedia.ui.activity;
+package com.example.multimedia.ui.activity.image;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -7,27 +7,24 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.example.mutilmedia.ui.activity.audio.AudioActivity;
-import com.example.mutilmedia.ui.activity.image.ImageActivity;
-import com.example.mutilmedia.ui.activity.video.VideoActivity;
+import com.example.multimedia.ui.activity.BaseActivity;
 
 import java.util.ArrayList;
 
 /**
  * @author huangyuming
  */
-public class MainActivity extends ListActivity {
-
+public class ImageActivity extends ListActivity {
+    private Intent mIntent = new Intent();
     private ArrayList<String> mTaskList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mTaskList.add("图像处理");
-        mTaskList.add("音频处理");
-        mTaskList.add("视频处理");
-        mTaskList.add("流媒体处理");
-        mTaskList.add("直播技术");
+        mTaskList.add("绘制图片");
+        mTaskList.add("加载大图");
+        mTaskList.add("使用Camera1 API 进行图像拍摄");
+        mTaskList.add("使用Camera2 API 进行图像拍摄");
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mTaskList);
         setListAdapter(adapter);
     }
@@ -37,17 +34,17 @@ public class MainActivity extends ListActivity {
         super.onListItemClick(l, v, position, id);
         switch (position) {
             case 0:
-                startActivity(new Intent(this, ImageActivity.class));
+                startActivity(new Intent(this, DrawImgActivity.class));
                 break;
             case 1:
-                startActivity(new Intent(this, AudioActivity.class));
+                mIntent.setClass(this, LargeImageViewActivity.class);
+                mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(1));
+                startActivity(mIntent);
                 break;
             case 2:
-                startActivity(new Intent(this, VideoActivity.class));
-                break;
-            case 3:
-                break;
-            case 4:
+                mIntent.setClass(this, Camera1Activity.class);
+                mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(1));
+                startActivity(mIntent);
                 break;
             default:
                 break;

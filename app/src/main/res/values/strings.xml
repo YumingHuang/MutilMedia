@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MutilMedia</string>
+    <string name="app_name">Multimedia</string>
 
     <string name="audio_btn_start_record">start record</string>
     <string name="audio_btn_stop_record">stop record</string>

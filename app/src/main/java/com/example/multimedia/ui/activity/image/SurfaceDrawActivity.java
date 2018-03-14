@@ -1,4 +1,4 @@
-package com.example.mutilmedia.ui.activity.image;
+package com.example.multimedia.ui.activity.image;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,8 +9,8 @@ import android.os.Bundle;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.example.mutilmedia.R;
-import com.example.mutilmedia.ui.activity.BaseActivity;
+import com.example.multimedia.R;
+import com.example.multimedia.ui.activity.BaseActivity;
 
 /**
  * @author huangyuming

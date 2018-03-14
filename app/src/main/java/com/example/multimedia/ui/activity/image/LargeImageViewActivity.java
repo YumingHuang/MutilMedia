@@ -1,10 +1,10 @@
-package com.example.mutilmedia.ui.activity.image;
+package com.example.multimedia.ui.activity.image;
 
 import android.os.Bundle;
 
-import com.example.mutilmedia.R;
-import com.example.mutilmedia.ui.activity.BaseActivity;
-import com.example.mutilmedia.ui.widget.LargeImageView;
+import com.example.multimedia.R;
+import com.example.multimedia.ui.activity.BaseActivity;
+import com.example.multimedia.ui.widget.LargeImageView;
 
 import java.io.IOException;
 import java.io.InputStream;

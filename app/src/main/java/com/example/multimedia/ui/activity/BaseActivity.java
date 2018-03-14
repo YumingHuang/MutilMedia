@@ -1,17 +1,7 @@
-package com.example.mutilmedia.ui.activity;
+package com.example.multimedia.ui.activity;
 
-import android.app.ListActivity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-
-import com.example.mutilmedia.ui.activity.audio.AudioActivity;
-import com.example.mutilmedia.ui.activity.image.ImageActivity;
-
-import java.util.ArrayList;
 
 /**
  * @author huangyuming

@@ -1,4 +1,4 @@
-package com.example.mutilmedia.ui.widget;
+package com.example.multimedia.ui.widget;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -8,10 +8,8 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
-import android.widget.ImageView;
 
-import com.example.mutilmedia.utils.MoveGestureDetector;
+import com.example.multimedia.utils.MoveGestureDetector;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,30 +19,25 @@ import java.io.InputStream;
  */
 public class LargeImageView extends android.support.v7.widget.AppCompatImageView {
     private BitmapRegionDecoder mDecoder;
-    /**
-     * 图片的宽度和高度
-     */
+    /*** 图片的宽度和高度*/
     private int mImageWidth, mImageHeight;
-    /**
-     * 绘制的区域
-     */
+    /*** 绘制的区域*/
     private volatile Rect mRect = new Rect();
-
+    /*** 移动手势*/
     private MoveGestureDetector mDetector;
 
-
-    private static final BitmapFactory.Options options = new BitmapFactory.Options();
+    private static final BitmapFactory.Options OPTIONS = new BitmapFactory.Options();
 
     static {
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        OPTIONS.inPreferredConfig = Bitmap.Config.RGB_565;
     }
 
     public LargeImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        initDetector();
     }
 
-    public void init() {
+    public void initDetector() {
         mDetector = new MoveGestureDetector(getContext(), new MoveGestureDetector.SimpleMoveGestureDetector() {
             @Override
             public boolean onMove(MoveGestureDetector detector) {
@@ -132,7 +125,7 @@ public class LargeImageView extends android.support.v7.widget.AppCompatImageView
 
     @Override
     protected void onDraw(Canvas canvas) {
-        Bitmap bm = mDecoder.decodeRegion(mRect, options);
+        Bitmap bm = mDecoder.decodeRegion(mRect, OPTIONS);
         canvas.drawBitmap(bm, 0, 0, null);
     }
 

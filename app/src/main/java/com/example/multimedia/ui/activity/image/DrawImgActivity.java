@@ -1,31 +1,29 @@
-package com.example.mutilmedia.ui.activity.audio;
+package com.example.multimedia.ui.activity.image;
 
 import android.app.ListActivity;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.example.mutilmedia.ui.activity.BaseActivity;
-import com.example.mutilmedia.ui.activity.image.CustomImgActivity;
-import com.example.mutilmedia.ui.activity.image.DrawImgActivity;
+import com.example.multimedia.ui.activity.BaseActivity;
 
 import java.util.ArrayList;
 
 /**
  * @author huangyuming
  */
-public class AudioActivity extends ListActivity {
-    private Intent mIntent = new Intent();
+public class DrawImgActivity extends ListActivity {
+
     private ArrayList<String> mTaskList = new ArrayList<>();
+    private Intent mIntent = new Intent();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mTaskList.add("MediaRecord和MediaPlayer API 完成音频的采集和播放");
-        mTaskList.add("AudioRecord和AudioTrack API 完成音频 PCM 数据的采集和播放");
+        mTaskList.add("SurfaceView绘制图片");
+        mTaskList.add("自定义View绘制图片");
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mTaskList);
         setListAdapter(adapter);
@@ -36,11 +34,14 @@ public class AudioActivity extends ListActivity {
         super.onListItemClick(l, v, position, id);
         switch (position) {
             case 0:
-                mIntent.setClass(this, MediaRecordActivity.class);
+                mIntent.setClass(this, SurfaceDrawActivity.class);
                 mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(0));
                 startActivity(mIntent);
                 break;
             case 1:
+                mIntent.setClass(this, CustomImgActivity.class);
+                mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(1));
+                startActivity(mIntent);
                 break;
             default:
                 break;

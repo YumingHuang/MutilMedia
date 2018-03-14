@@ -1,14 +1,14 @@
-package com.example.mutilmedia.utils;
+package com.example.multimedia.utils;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.Environment;
+
+import com.example.multimedia.common.Constants;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,37 +16,37 @@ import java.io.OutputStream;
 public class AudioUtil {
 
     private static AudioUtil mInstance;
-    private AudioRecord recorder;
-    //录音源
-    private static int audioSource = MediaRecorder.AudioSource.MIC;
-    //录音的采样频率
-    private static int audioRate = 44100;
-    //录音的声道，单声道
-    private static int audioChannel = AudioFormat.CHANNEL_IN_MONO;
-    //量化的深度
-    private static int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
-    //缓存的大小
-    private static int bufferSize = AudioRecord.getMinBufferSize(audioRate, audioChannel, audioFormat);
-    //记录播放状态
-    private boolean isRecording = false;
-    //数字信号数组
-    private byte[] noteArray;
-    //PCM文件
-    private File pcmFile;
-    //WAV文件
-    private File wavFile;
-    //文件输出流
-    private OutputStream os;
-    //文件根目录
-    private String basePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/yinfu/";
-    //wav文件目录
-    private String outFileName = basePath + "/yinfu.wav";
-    //pcm文件目录
-    private String inFileName = basePath + "/yinfu.pcm";
+    private AudioRecord mRecorder;
+    /*** 录音源 */
+    private static int mAudioSource = MediaRecorder.AudioSource.MIC;
+    /*** 录音的采样频率 */
+    private static int mAudioRate = 44100;
+    /*** 录音的声道，单声道 */
+    private static int mAudioChannel = AudioFormat.CHANNEL_IN_MONO;
+    /*** 量化的深度 */
+    private static int mAudioFormat = AudioFormat.ENCODING_PCM_16BIT;
+    /*** 缓存的大小 */
+    private static int mBufferSize = AudioRecord.getMinBufferSize(mAudioRate, mAudioChannel, mAudioFormat);
+    /*** 记录播放状态 */
+    private boolean mIsRecording = false;
+    /*** 数字信号数组 */
+    private byte[] mNoteArray;
+    /*** PCM文件 */
+    private File mPcmFile;
+    /*** WAV文件 */
+    private File mWavFile;
+    /*** 文件输出流 */
+    private OutputStream mOs;
+    /*** 文件根目录 */
+    private String mBasePath = Constants.AUDIO_PATH;
+    /*** wav文件目录 */
+    private String mOutFileName = mBasePath + "/yinfu.wav";
+    /*** pcm文件目录 */
+    private String mInFileName = mBasePath + "/yinfu.pcm";
 
     private AudioUtil() {
         createFile();//创建文件
-        recorder = new AudioRecord(audioSource, audioRate, audioChannel, audioFormat, bufferSize);
+        mRecorder = new AudioRecord(mAudioSource, mAudioRate, mAudioChannel, mAudioFormat, mBufferSize);
     }
 
     public synchronized static AudioUtil getInstance() {
@@ -66,42 +66,46 @@ public class AudioUtil {
         }
     }
 
-    //开始录音
+    /**
+     * 开始录音
+     */
     public void startRecord() {
-        isRecording = true;
-        recorder.startRecording();
+        mIsRecording = true;
+        mRecorder.startRecording();
     }
 
-    //停止录音
+    /**
+     * 停止录音
+     */
     public void stopRecord() {
-        isRecording = false;
-        recorder.stop();
+        mIsRecording = false;
+        mRecorder.stop();
     }
 
     /**
      * 将数据写入文件夹,文件的写入没有做优化
      */
     public void writeData() {
-        noteArray = new byte[bufferSize];
+        mNoteArray = new byte[mBufferSize];
         //建立文件输出流
         try {
-            os = new BufferedOutputStream(new FileOutputStream(pcmFile));
+            mOs = new BufferedOutputStream(new FileOutputStream(mPcmFile));
         } catch (IOException e) {
 
         }
-        while (isRecording == true) {
-            int recordSize = recorder.read(noteArray, 0, bufferSize);
+        while (mIsRecording == true) {
+            int recordSize = mRecorder.read(mNoteArray, 0, mBufferSize);
             if (recordSize > 0) {
                 try {
-                    os.write(noteArray);
+                    mOs.write(mNoteArray);
                 } catch (IOException e) {
 
                 }
             }
         }
-        if (os != null) {
+        if (mOs != null) {
             try {
-                os.close();
+                mOs.close();
             } catch (IOException e) {
 
             }
@@ -116,13 +120,13 @@ public class AudioUtil {
         FileOutputStream out = null;
         long totalAudioLen = 0;
         long totalDataLen = totalAudioLen + 36;
-        long longSampleRate = AudioUtil.audioRate;
+        long longSampleRate = AudioUtil.mAudioRate;
         int channels = 1;
-        long byteRate = 16 * AudioUtil.audioRate * channels / 8;
-        byte[] data = new byte[bufferSize];
+        long byteRate = 16 * AudioUtil.mAudioRate * channels / 8;
+        byte[] data = new byte[mBufferSize];
         try {
-            in = new FileInputStream(inFileName);
-            out = new FileOutputStream(outFileName);
+            in = new FileInputStream(mInFileName);
+            out = new FileOutputStream(mOutFileName);
             totalAudioLen = in.getChannel().size();
             //由于不包括RIFF和WAV
             totalDataLen = totalAudioLen + 36;
@@ -132,8 +136,6 @@ public class AudioUtil {
             }
             in.close();
             out.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -212,21 +214,21 @@ public class AudioUtil {
      * 创建文件夹,首先创建目录，然后创建对应的文件
      */
     public void createFile() {
-        File baseFile = new File(basePath);
+        File baseFile = new File(mBasePath);
         if (!baseFile.exists()) {
             baseFile.mkdirs();
         }
-        pcmFile = new File(basePath + "/yinfu.pcm");
-        wavFile = new File(basePath + "/yinfu.wav");
-        if (pcmFile.exists()) {
-            pcmFile.delete();
+        mPcmFile = new File(mBasePath + "/yinfu.pcm");
+        mWavFile = new File(mBasePath + "/yinfu.wav");
+        if (mPcmFile.exists()) {
+            mPcmFile.delete();
         }
-        if (wavFile.exists()) {
-            wavFile.delete();
+        if (mWavFile.exists()) {
+            mWavFile.delete();
         }
         try {
-            pcmFile.createNewFile();
-            wavFile.createNewFile();
+            mPcmFile.createNewFile();
+            mWavFile.createNewFile();
         } catch (IOException e) {
 
         }

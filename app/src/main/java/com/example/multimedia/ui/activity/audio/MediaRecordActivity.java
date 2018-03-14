@@ -1,17 +1,17 @@
-package com.example.mutilmedia.ui.activity.audio;
+package com.example.multimedia.ui.activity.audio;
 
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.mutilmedia.R;
-import com.example.mutilmedia.ui.activity.BaseActivity;
+import com.example.multimedia.R;
+import com.example.multimedia.common.Constants;
+import com.example.multimedia.ui.activity.BaseActivity;
 
 import java.io.File;
 import java.util.concurrent.ExecutorService;
@@ -108,8 +108,7 @@ public class MediaRecordActivity extends BaseActivity implements View.OnClickLis
             //创建MediaRecorder
             mMediaRecorder = new MediaRecorder();
             //创建录音文件
-            mRecorderFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
-                    + "/recorder_demo/" + System.currentTimeMillis() + ".m4a");
+            mRecorderFile = new File(Constants.AUDIO_PATH + System.currentTimeMillis() + Constants.AUDIO_M4A);
             if (!mRecorderFile.getParentFile().exists()) {
                 mRecorderFile.getParentFile().mkdirs();
             }

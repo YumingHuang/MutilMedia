@@ -1,4 +1,4 @@
-package com.example.mutilmedia.utils;
+package com.example.multimedia.utils;
 
 import android.content.Context;
 import android.graphics.PointF;
@@ -75,7 +75,6 @@ public class MoveGestureDetector extends BaseGestureDetector {
         Log.e("TAG", "mSkipThisMoveEvent = " + mSkipThisMoveEvent);
         mExtenalPointer.x = mSkipThisMoveEvent ? 0 : mCurrentPointer.x - mPrePointer.x;
         mExtenalPointer.y = mSkipThisMoveEvent ? 0 : mCurrentPointer.y - mPrePointer.y;
-
     }
 
     /**

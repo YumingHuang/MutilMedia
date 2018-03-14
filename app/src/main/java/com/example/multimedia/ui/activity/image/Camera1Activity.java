@@ -1,4 +1,4 @@
-package com.example.mutilmedia.ui.activity.image;
+package com.example.multimedia.ui.activity.image;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,8 +12,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.example.mutilmedia.R;
-import com.example.mutilmedia.ui.activity.BaseActivity;
+import com.example.multimedia.R;
+import com.example.multimedia.ui.activity.BaseActivity;
 
 import java.io.IOException;
 
@@ -35,6 +35,10 @@ public class Camera1Activity extends BaseActivity implements View.OnClickListene
 
         setContentView(R.layout.activity_image_camera1);
         initView();
+        if (!isCameraCanUse()) {
+            finish();
+            Toast.makeText(this, "Camera cannot not use!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -79,6 +83,29 @@ public class Camera1Activity extends BaseActivity implements View.OnClickListene
             mViewWidth = mSurfaceView.getWidth();
             mViewHeight = mSurfaceView.getHeight();
         }
+    }
+
+    /**
+     * 判断摄像头是否可用
+     *
+     * @return
+     */
+    public boolean isCameraCanUse() {
+        boolean canUse = false;
+        Camera mCamera = null;
+        try {
+            mCamera = Camera.open(0);
+            Camera.Parameters mParameters = mCamera.getParameters();
+            mCamera.setParameters(mParameters);
+        } catch (Exception e) {
+            canUse = false;
+        }
+
+        if (mCamera != null) {
+            mCamera.release();
+            canUse = true;
+        }
+        return canUse;
     }
 
     private void initCamera() {

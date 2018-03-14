@@ -1,4 +1,4 @@
-package com.example.mutilmedia.ui.widget;
+package com.example.multimedia.ui.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -9,7 +9,7 @@ import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.example.mutilmedia.R;
+import com.example.multimedia.R;
 
 /**
  * Created by TangZH on 2017/4/30.
