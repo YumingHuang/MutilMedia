@@ -1,7 +1,10 @@
 package com.example.multimedia.ui.activity;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+
+import com.example.multimedia.utils.PermissionUtils;
 
 /**
  * @author huangyuming
@@ -42,4 +45,5 @@ public class BaseActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
     }
+    
 }

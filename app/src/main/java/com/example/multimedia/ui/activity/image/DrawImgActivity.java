@@ -32,19 +32,17 @@ public class DrawImgActivity extends ListActivity {
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
+        mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(position));
         switch (position) {
             case 0:
                 mIntent.setClass(this, SurfaceDrawActivity.class);
-                mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(0));
-                startActivity(mIntent);
                 break;
             case 1:
                 mIntent.setClass(this, CustomImgActivity.class);
-                mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(1));
-                startActivity(mIntent);
                 break;
             default:
                 break;
         }
+        startActivity(mIntent);
     }
 }

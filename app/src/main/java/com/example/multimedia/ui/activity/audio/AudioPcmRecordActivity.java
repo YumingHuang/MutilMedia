@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
 /**
  * @author huangyuming
  */
-public class AudioRecordActivity extends BaseActivity implements View.OnClickListener {
+public class AudioPcmRecordActivity extends BaseActivity implements View.OnClickListener {
 
     private Button mRecordBtn;
     private Button mPlayBtn;
@@ -270,6 +270,7 @@ public class AudioRecordActivity extends BaseActivity implements View.OnClickLis
             //构造AudioTrack  不能小于AudioTrack的最低要求，也不能小于我们每次读的大小
             AudioTrack audioTrack = new AudioTrack(streamType, sampleRate, channelConfig, audioFormat,
                     Math.max(minBufferSize, BUFFER_SIZE), mode);
+            audioTrack.play();
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

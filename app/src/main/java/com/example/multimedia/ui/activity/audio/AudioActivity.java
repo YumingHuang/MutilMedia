@@ -23,6 +23,7 @@ public class AudioActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         mTaskList.add("MediaRecord和MediaPlayer API 完成音频的采集和播放");
         mTaskList.add("AudioRecord和AudioTrack API 完成音频 PCM 数据的采集和播放");
+        mTaskList.add("AudioRecord和AudioTrack API 完成音频 PCM 转 WAV格式");
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mTaskList);
         setListAdapter(adapter);
@@ -31,19 +32,20 @@ public class AudioActivity extends ListActivity {
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
+        mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(position));
         switch (position) {
             case 0:
                 mIntent.setClass(this, MediaRecordActivity.class);
-                mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(0));
-                startActivity(mIntent);
                 break;
             case 1:
-                mIntent.setClass(this, AudioRecordActivity.class);
-                mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(1));
-                startActivity(mIntent);
+                mIntent.setClass(this, AudioPcmRecordActivity.class);
+                break;
+            case 2:
+                mIntent.setClass(this, AudioWavRecordActivity.class);
                 break;
             default:
                 break;
         }
+        startActivity(mIntent);
     }
 }

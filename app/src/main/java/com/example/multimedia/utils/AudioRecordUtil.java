@@ -12,10 +12,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.Executors;
 
-public class AudioUtil {
+public class AudioRecordUtil {
 
-    private static AudioUtil mInstance;
+    private static AudioRecordUtil mInstance;
     private AudioRecord mRecorder;
     /*** 录音源 */
     private static int mAudioSource = MediaRecorder.AudioSource.MIC;
@@ -44,14 +45,14 @@ public class AudioUtil {
     /*** pcm文件目录 */
     private String mInFileName = mBasePath + "/yinfu.pcm";
 
-    private AudioUtil() {
+    private AudioRecordUtil() {
         createFile();//创建文件
         mRecorder = new AudioRecord(mAudioSource, mAudioRate, mAudioChannel, mAudioFormat, mBufferSize);
     }
 
-    public synchronized static AudioUtil getInstance() {
+    public synchronized static AudioRecordUtil getInstance() {
         if (mInstance == null) {
-            mInstance = new AudioUtil();
+            mInstance = new AudioRecordUtil();
         }
         return mInstance;
     }
@@ -91,15 +92,15 @@ public class AudioUtil {
         try {
             mOs = new BufferedOutputStream(new FileOutputStream(mPcmFile));
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
-        while (mIsRecording == true) {
+        while (mIsRecording) {
             int recordSize = mRecorder.read(mNoteArray, 0, mBufferSize);
             if (recordSize > 0) {
                 try {
                     mOs.write(mNoteArray);
                 } catch (IOException e) {
-
+                    e.printStackTrace();
                 }
             }
         }
@@ -107,7 +108,7 @@ public class AudioUtil {
             try {
                 mOs.close();
             } catch (IOException e) {
-
+                e.printStackTrace();
             }
         }
     }
@@ -116,13 +117,13 @@ public class AudioUtil {
      * 这里得到可播放的音频文件
      */
     public void convertWaveFile() {
-        FileInputStream in = null;
-        FileOutputStream out = null;
-        long totalAudioLen = 0;
-        long totalDataLen = totalAudioLen + 36;
-        long longSampleRate = AudioUtil.mAudioRate;
+        FileInputStream in;
+        FileOutputStream out;
+        long totalAudioLen;
+        long totalDataLen;
+        long longSampleRate = AudioRecordUtil.mAudioRate;
         int channels = 1;
-        long byteRate = 16 * AudioUtil.mAudioRate * channels / 8;
+        long byteRate = 16 * AudioRecordUtil.mAudioRate * channels / 8;
         byte[] data = new byte[mBufferSize];
         try {
             in = new FileInputStream(mInFileName);
@@ -218,8 +219,8 @@ public class AudioUtil {
         if (!baseFile.exists()) {
             baseFile.mkdirs();
         }
-        mPcmFile = new File(mBasePath + "/yinfu.pcm");
-        mWavFile = new File(mBasePath + "/yinfu.wav");
+        mPcmFile = new File(mInFileName);
+        mWavFile = new File(mOutFileName);
         if (mPcmFile.exists()) {
             mPcmFile.delete();
         }
@@ -230,7 +231,7 @@ public class AudioUtil {
             mPcmFile.createNewFile();
             mWavFile.createNewFile();
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
     }
 
@@ -238,6 +239,7 @@ public class AudioUtil {
      * 记录数据
      */
     public void recordData() {
-        new Thread(new WriteThread()).start();
+        Executors.newSingleThreadExecutor().submit(new WriteThread());
+        //    new Thread(new WriteThread()).start();
     }
 }

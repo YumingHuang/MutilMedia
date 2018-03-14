@@ -20,7 +20,7 @@ import java.io.IOException;
 /**
  * @author huangyuming
  */
-public class Camera1Activity extends BaseActivity implements View.OnClickListener {
+public class Camera1SurfaceActivity extends BaseActivity implements View.OnClickListener {
 
     private SurfaceView mSurfaceView;
     private SurfaceHolder mSurfaceHolder;
@@ -33,7 +33,7 @@ public class Camera1Activity extends BaseActivity implements View.OnClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_image_camera1);
+        setContentView(R.layout.activity_image_camera1_surface);
         initView();
         if (!isCameraCanUse()) {
             finish();
@@ -122,6 +122,7 @@ public class Camera1Activity extends BaseActivity implements View.OnClickListene
                 parameters.setPreviewFpsRange(4, 10);
                 //设置图片格式
                 parameters.setPictureFormat(ImageFormat.JPEG);
+                parameters.setPreviewFormat(ImageFormat.NV21);
                 //设置图片的质量
                 parameters.set("jpeg-quality", 90);
                 //设置照片的大小
@@ -182,7 +183,7 @@ public class Camera1Activity extends BaseActivity implements View.OnClickListene
         public void onPictureTaken(byte[] data, Camera camera) {
             final Bitmap resource = BitmapFactory.decodeByteArray(data, 0, data.length);
             if (resource == null) {
-                Toast.makeText(Camera1Activity.this, "拍照失败", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Camera1SurfaceActivity.this, "拍照失败", Toast.LENGTH_SHORT).show();
             }
             final Matrix matrix = new Matrix();
             matrix.setRotate(90);
@@ -192,7 +193,7 @@ public class Camera1Activity extends BaseActivity implements View.OnClickListene
                 mCamera.stopPreview();
                 mShowImage.setVisibility(View.VISIBLE);
                 mSurfaceView.setVisibility(View.GONE);
-                Toast.makeText(Camera1Activity.this, "拍照", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Camera1SurfaceActivity.this, "拍照", Toast.LENGTH_SHORT).show();
                 mShowImage.setImageBitmap(bitmap);
             }
         }
