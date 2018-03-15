@@ -1,13 +1,19 @@
 package com.example.multimedia.ui.activity.image;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.multimedia.R;
@@ -19,10 +25,11 @@ import java.util.List;
 /**
  * @author huangyuming
  */
-public class Camera1TextureActivity extends BaseActivity {
+public class Camera1TextureActivity extends BaseActivity implements View.OnClickListener {
 
     private TextureView mTextureView;
     private SurfaceTexture mSurfaceTexture;
+    private ImageView mShowImage;
     private Camera mCamera;
     private int mViewWidth, mViewHeight;
 
@@ -42,20 +49,32 @@ public class Camera1TextureActivity extends BaseActivity {
      * 初始化控件
      */
     private void initView() {
+        mShowImage = findViewById(R.id.iv_show_camera1_activity);
         mTextureView = findViewById(R.id.tv_camera);
         mTextureView.setSurfaceTextureListener(new MySurfaceTextureViewListener());
+        mTextureView.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (mCamera != null) {
+            //自动对焦后拍照
+            mCamera.autoFocus(autoFocusCallback);
+        }
     }
 
     private class MySurfaceTextureViewListener implements TextureView.SurfaceTextureListener {
 
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+            Log.d(TAG, "onSurfaceTextureAvailable");
             mSurfaceTexture = surface;
             initCamera();
         }
 
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+            Log.d(TAG, "onSurfaceTextureSizeChanged");
             int displayOrientation = getDisplayOrientation();
             mCamera.setDisplayOrientation(displayOrientation);
             List<Camera.Size> supportedPreviewSizes = mCamera.getParameters().getSupportedPreviewSizes();
@@ -65,6 +84,7 @@ public class Camera1TextureActivity extends BaseActivity {
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+            Log.d(TAG, "onSurfaceTextureDestroyed");
             surface.release();
             mCamera.setPreviewCallback(null);
             mCamera.stopPreview();
@@ -75,7 +95,7 @@ public class Camera1TextureActivity extends BaseActivity {
 
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
+            Log.d(TAG, "onSurfaceTextureUpdated");
         }
     }
 
@@ -105,8 +125,12 @@ public class Camera1TextureActivity extends BaseActivity {
             parameters.set("jpeg-quality", 90);
             //设置照片的大小
             parameters.setPictureSize(mViewWidth, mViewHeight);
-            //通过SurfaceView显示预览
-            // mCamera.setPreviewDisplay(mSurfaceHolder);
+            //通过设置SurfaceTexture，类似 surfaceView的setPreviewDisplay(mSurfaceHolder);
+            try {
+                mCamera.setPreviewTexture(mSurfaceTexture);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             // 开始预览
             mCamera.startPreview();
         }
@@ -187,9 +211,61 @@ public class Camera1TextureActivity extends BaseActivity {
     }
 
     /**
+     * 自动对焦 对焦成功后 就进行拍照
+     */
+    @SuppressWarnings("AliDeprecation")
+    private Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+        @Override
+        public void onAutoFocus(boolean success, Camera camera) {
+            //对焦成功
+            if (success) {
+                //按下快门
+                camera.takePicture(new Camera.ShutterCallback() {
+                    @Override
+                    public void onShutter() {
+                        //按下快门瞬间的操作
+                        Log.d(TAG, "onShutter");
+                    }
+                }, new Camera.PictureCallback() {
+                    @Override
+                    public void onPictureTaken(byte[] data, Camera camera) {
+                        //是否保存原始图片的信息
+                        Log.d(TAG, "autoFocusCallback onPictureTaken");
+                    }
+                }, pictureCallback);
+            }
+        }
+    };
+
+    /**
+     * 获取图片
+     */
+    private Camera.PictureCallback pictureCallback = new Camera.PictureCallback() {
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+            Log.d(TAG, "pictureCallback onPictureTaken");
+            final Bitmap resource = BitmapFactory.decodeByteArray(data, 0, data.length);
+            if (resource == null) {
+                Toast.makeText(Camera1TextureActivity.this, "拍照失败", Toast.LENGTH_SHORT).show();
+            }
+            final Matrix matrix = new Matrix();
+            matrix.setRotate(90);
+            final Bitmap bitmap = Bitmap.createBitmap(resource, 0, 0, resource.getWidth(), resource
+                    .getHeight(), matrix, true);
+            if (bitmap != null && mShowImage != null && mShowImage.getVisibility() == View.GONE) {
+                mCamera.stopPreview();
+                mShowImage.setVisibility(View.VISIBLE);
+                mTextureView.setVisibility(View.GONE);
+                Toast.makeText(Camera1TextureActivity.this, "拍照", Toast.LENGTH_SHORT).show();
+                mShowImage.setImageBitmap(bitmap);
+            }
+        }
+    };
+
+    /**
      * 判断摄像头是否可用
      *
-     * @return
+     * @return boolean
      */
     public boolean isCameraCanUse() {
         boolean canUse = false;

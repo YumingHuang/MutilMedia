@@ -3,6 +3,7 @@ package com.example.multimedia.utils;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.util.Log;
 
 import com.example.multimedia.common.Constants;
 
@@ -41,9 +42,9 @@ public class AudioRecordUtil {
     /*** 文件根目录 */
     private String mBasePath = Constants.AUDIO_PATH;
     /*** wav文件目录 */
-    private String mOutFileName = mBasePath + "/yinfu.wav";
+    private String mOutFileName = mBasePath + System.currentTimeMillis() + Constants.AUDIO_WAV;
     /*** pcm文件目录 */
-    private String mInFileName = mBasePath + "/yinfu.pcm";
+    private String mInFileName = mBasePath + System.currentTimeMillis() + Constants.AUDIO_PCM;
 
     private AudioRecordUtil() {
         createFile();//创建文件
@@ -116,7 +117,7 @@ public class AudioRecordUtil {
     /**
      * 这里得到可播放的音频文件
      */
-    public void convertWaveFile() {
+    public String convertWaveFile() {
         FileInputStream in;
         FileOutputStream out;
         long totalAudioLen;
@@ -131,7 +132,7 @@ public class AudioRecordUtil {
             totalAudioLen = in.getChannel().size();
             //由于不包括RIFF和WAV
             totalDataLen = totalAudioLen + 36;
-            WriteWaveFileHeader(out, totalAudioLen, totalDataLen, longSampleRate, channels, byteRate);
+            writeWaveFileHeader(out, totalAudioLen, totalDataLen, longSampleRate, channels, byteRate);
             while (in.read(data) != -1) {
                 out.write(data);
             }
@@ -140,13 +141,14 @@ public class AudioRecordUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return mOutFileName;
     }
 
     /**
      * 任何一种文件在头部添加相应的头文件才能够确定的表示这种文件的格式，wave是RIFF文件结构，每一部分为一个chunk，其中有RIFF WAVE chunk，
      * FMT Chunk，Fact chunk,Data chunk,其中Fact chunk是可以选择的，
      */
-    private void WriteWaveFileHeader(FileOutputStream out, long totalAudioLen, long totalDataLen, long longSampleRate,
+    private void writeWaveFileHeader(FileOutputStream out, long totalAudioLen, long totalDataLen, long longSampleRate,
                                      int channels, long byteRate) throws IOException {
         byte[] header = new byte[44];
         // RIFF
@@ -209,6 +211,7 @@ public class AudioRecordUtil {
         header[42] = (byte) ((totalAudioLen >> 16) & 0xff);
         header[43] = (byte) ((totalAudioLen >> 24) & 0xff);
         out.write(header, 0, 44);
+        Log.d("TAG", "write head success");
     }
 
     /**
@@ -240,6 +243,5 @@ public class AudioRecordUtil {
      */
     public void recordData() {
         Executors.newSingleThreadExecutor().submit(new WriteThread());
-        //    new Thread(new WriteThread()).start();
     }
 }

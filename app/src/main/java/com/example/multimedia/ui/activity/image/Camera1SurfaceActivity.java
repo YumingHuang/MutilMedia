@@ -6,6 +6,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -45,9 +46,9 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
      * 初始化控件
      */
     private void initView() {
-        mShowImage = findViewById(R.id.iv_show_camera2_activity);
+        mShowImage = findViewById(R.id.iv_show_camera1_activity);
         //mSurfaceView
-        mSurfaceView = findViewById(R.id.surface_view_camera2_activity);
+        mSurfaceView = findViewById(R.id.surface_view_camera1_activity);
         mSurfaceHolder = mSurfaceView.getHolder();
         // mSurfaceView 不需要自己的缓冲区
         mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -55,7 +56,6 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
         mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
-                // 初始化Camera
                 initCamera();
             }
 
@@ -65,11 +65,7 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-                // 释放Camera资源
-                if (mCamera != null) {
-                    mCamera.stopPreview();
-                    mCamera.release();
-                }
+                releaseCamera();
             }
         });
         //设置点击监听
@@ -108,7 +104,11 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
         return canUse;
     }
 
+    /**
+     * 初始化相机
+     */
     private void initCamera() {
+        releaseCamera();
         //默认开启后置
         mCamera = Camera.open();
         //摄像头进行旋转90°
@@ -138,23 +138,28 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
     }
 
     /**
-     * 点击回调方法
+     * 释放Camera资源
      */
-    @Override
-    public void onClick(View v) {
-        if (mCamera == null) {
-            return;
+    private void releaseCamera() {
+        if (mCamera != null) {
+            mCamera.stopPreview();
+            mCamera.release();
         }
-        //自动对焦后拍照
-        mCamera.autoFocus(autoFocusCallback);
     }
 
+    @Override
+    public void onClick(View v) {
+        if (mCamera != null) {
+            //自动对焦后拍照
+            mCamera.autoFocus(autoFocusCallback);
+        }
+    }
 
     /**
      * 自动对焦 对焦成功后 就进行拍照
      */
     @SuppressWarnings("AliDeprecation")
-    Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+    private Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
         @Override
         public void onAutoFocus(boolean success, Camera camera) {
             //对焦成功
@@ -164,11 +169,13 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
                     @Override
                     public void onShutter() {
                         //按下快门瞬间的操作
+                        Log.d(TAG, "onShutter");
                     }
                 }, new Camera.PictureCallback() {
                     @Override
                     public void onPictureTaken(byte[] data, Camera camera) {
                         //是否保存原始图片的信息
+                        Log.d(TAG, "autoFocusCallback onPictureTaken");
                     }
                 }, pictureCallback);
             }
@@ -178,9 +185,10 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
     /**
      * 获取图片
      */
-    Camera.PictureCallback pictureCallback = new Camera.PictureCallback() {
+    private Camera.PictureCallback pictureCallback = new Camera.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
+            Log.d(TAG, "pictureCallback onPictureTaken");
             final Bitmap resource = BitmapFactory.decodeByteArray(data, 0, data.length);
             if (resource == null) {
                 Toast.makeText(Camera1SurfaceActivity.this, "拍照失败", Toast.LENGTH_SHORT).show();

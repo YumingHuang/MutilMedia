@@ -47,8 +47,11 @@ public class ImageActivity extends ListActivity {
             case 3:
                 mIntent.setClass(this, Camera1TextureActivity.class);
                 break;
-            default:
+            case 4:
+                mIntent.setClass(this, Camera2SurfaceActivity.class);
                 break;
+            default:
+                return;
         }
         startActivity(mIntent);
     }
