@@ -29,6 +29,7 @@
         <activity android:name="com.example.multimedia.ui.activity.image.Camera1TextureActivity" />
         <activity android:name="com.example.multimedia.ui.activity.image.Camera2SurfaceActivity" />
         <activity android:name="com.example.multimedia.ui.activity.image.LargeImageViewActivity" />
+        <activity android:name="com.example.multimedia.ui.activity.image.SimpleOpenGLActivity" />
         <activity android:name="com.example.multimedia.ui.activity.audio.AudioActivity" />
         <activity android:name="com.example.multimedia.ui.activity.audio.MediaRecordActivity" />
         <activity android:name="com.example.multimedia.ui.activity.audio.AudioPcmRecordActivity" />

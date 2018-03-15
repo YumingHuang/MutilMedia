@@ -46,7 +46,7 @@ public class SurfaceDrawActivity extends BaseActivity implements SurfaceHolder.C
         //获取SurfaceHolder对象
         mHolder = mSurView.getHolder();
         mHolder.addCallback(this);
-        mBitmap = BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher);
+        mBitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.android);
     }
 
     @Override

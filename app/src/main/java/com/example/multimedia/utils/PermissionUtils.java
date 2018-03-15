@@ -43,10 +43,14 @@ public class PermissionUtils {
     public static final String PERMISSION_READ_PHONE_STATE = Manifest.permission.READ_PHONE_STATE;
     public static final String PERMISSION_CALL_PHONE = Manifest.permission.CALL_PHONE;
     public static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
-    public static final String PERMISSION_ACCESS_FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
-    public static final String PERMISSION_ACCESS_COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
-    public static final String PERMISSION_READ_EXTERNAL_STORAGE = Manifest.permission.READ_EXTERNAL_STORAGE;
-    public static final String PERMISSION_WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    public static final String PERMISSION_ACCESS_FINE_LOCATION = Manifest.permission
+            .ACCESS_FINE_LOCATION;
+    public static final String PERMISSION_ACCESS_COARSE_LOCATION = Manifest.permission
+            .ACCESS_COARSE_LOCATION;
+    public static final String PERMISSION_READ_EXTERNAL_STORAGE = Manifest.permission
+            .READ_EXTERNAL_STORAGE;
+    public static final String PERMISSION_WRITE_EXTERNAL_STORAGE = Manifest.permission
+            .WRITE_EXTERNAL_STORAGE;
 
     private static final String[] requestPermissions = {
             PERMISSION_RECORD_AUDIO,
@@ -68,9 +72,11 @@ public class PermissionUtils {
      * Requests permission.
      *
      * @param activity
-     * @param requestCode request code, e.g. if you need request CAMERA permission,parameters is PermissionUtils.CODE_CAMERA
+     * @param requestCode request code, e.g. if you need request CAMERA permission,parameters is
+     *                    PermissionUtils.CODE_CAMERA
      */
-    public static void requestPermission(final Activity activity, final int requestCode, PermissionGrant permissionGrant) {
+    public static void requestPermission(final Activity activity, final int requestCode,
+                                         PermissionGrant permissionGrant) {
         if (activity == null) {
             return;
         }
@@ -84,7 +90,8 @@ public class PermissionUtils {
         final String requestPermission = requestPermissions[requestCode];
 
         //如果是6.0以下的手机，ActivityCompat.checkSelfPermission()会始终等于PERMISSION_GRANTED，  
-        // 但是，如果用户关闭了你申请的权限，ActivityCompat.checkSelfPermission(),会导致程序崩溃(java.lang.RuntimeException: Unknown exception code: 1 msg null)，  
+        // 但是，如果用户关闭了你申请的权限，ActivityCompat.checkSelfPermission(),会导致程序崩溃(java.lang.RuntimeException:
+        // Unknown exception code: 1 msg null)，
         // 你可以使用try{}catch(){},处理异常，也可以在这个地方，低于23就什么都不做，  
         // 个人建议try{}catch(){}单独处理，提示用户开启权限。  
 //        if (Build.VERSION.SDK_INT < 23) {  
@@ -111,17 +118,20 @@ public class PermissionUtils {
 
             } else {
                 Log.d(TAG, "requestCameraPermission else");
-                ActivityCompat.requestPermissions(activity, new String[]{requestPermission}, requestCode);
+                ActivityCompat.requestPermissions(activity, new String[]{requestPermission},
+                        requestCode);
             }
 
         } else {
             Log.d(TAG, "ActivityCompat.checkSelfPermission ==== PackageManager.PERMISSION_GRANTED");
-            Toast.makeText(activity, "opened:" + requestPermissions[requestCode], Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "opened:" + requestPermissions[requestCode], Toast.LENGTH_SHORT)
+                    .show();
             permissionGrant.onPermissionGranted(requestCode);
         }
     }
 
-    private static void requestMultiResult(Activity activity, String[] permissions, int[] grantResults, PermissionGrant permissionGrant) {
+    private static void requestMultiResult(Activity activity, String[] permissions, int[]
+            grantResults, PermissionGrant permissionGrant) {
         if (activity == null) {
             return;
         }
@@ -132,7 +142,8 @@ public class PermissionUtils {
 
         ArrayList<String> notGranted = new ArrayList<>();
         for (int i = 0; i < permissions.length; i++) {
-            Log.d(TAG, "permissions: [i]:" + i + ", permissions[i]" + permissions[i] + ",grantResults[i]:" + grantResults[i]);
+            Log.d(TAG, "permissions: [i]:" + i + ", permissions[i]" + permissions[i] + "," +
+                    "grantResults[i]:" + grantResults[i]);
             perms.put(permissions[i], grantResults[i]);
             if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                 notGranted.add(permissions[i]);
@@ -161,10 +172,12 @@ public class PermissionUtils {
         if (permissionsList == null || shouldRationalePermissionsList == null) {
             return;
         }
-        Log.d(TAG, "requestMultiPermissions permissionsList:" + permissionsList.size() + ",shouldRationalePermissionsList:" + shouldRationalePermissionsList.size());
+        Log.d(TAG, "requestMultiPermissions permissionsList:" + permissionsList.size() + "," +
+                "shouldRationalePermissionsList:" + shouldRationalePermissionsList.size());
 
         if (permissionsList.size() > 0) {
-            ActivityCompat.requestPermissions(activity, permissionsList.toArray(new String[permissionsList.size()]),
+            ActivityCompat.requestPermissions(activity, permissionsList.toArray(new
+                            String[permissionsList.size()]),
                     CODE_MULTI_PERMISSION);
             Log.d(TAG, "showMessageOKCancel requestPermissions");
 
@@ -173,7 +186,8 @@ public class PermissionUtils {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(activity, shouldRationalePermissionsList.toArray(new String[shouldRationalePermissionsList.size()]),
+                            ActivityCompat.requestPermissions(activity, shouldRationalePermissionsList
+                                            .toArray(new String[shouldRationalePermissionsList.size()]),
                                     CODE_MULTI_PERMISSION);
                             Log.d(TAG, "showMessageOKCancel requestPermissions");
                         }
@@ -184,10 +198,12 @@ public class PermissionUtils {
     }
 
 
-    private static void shouldShowRationale(final Activity activity, final int requestCode, final String requestPermission) {
+    private static void shouldShowRationale(final Activity activity, final int requestCode, final
+    String requestPermission) {
         //TODO  
         String[] permissionsHint = activity.getResources().getStringArray(R.array.permissions);
-        showMessageOKCancel(activity, "Rationale: " + permissionsHint[requestCode], new DialogInterface.OnClickListener() {
+        showMessageOKCancel(activity, "Rationale: " + permissionsHint[requestCode], new
+                DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ActivityCompat.requestPermissions(activity,
@@ -198,7 +214,8 @@ public class PermissionUtils {
         });
     }
 
-    private static void showMessageOKCancel(final Activity context, String message, DialogInterface.OnClickListener okListener) {
+    private static void showMessageOKCancel(final Activity context, String message, DialogInterface
+            .OnClickListener okListener) {
         new AlertDialog.Builder(context)
                 .setMessage(message)
                 .setPositiveButton("OK", okListener)
@@ -213,8 +230,10 @@ public class PermissionUtils {
      * @param permissions
      * @param grantResults
      */
-    public static void requestPermissionsResult(final Activity activity, final int requestCode, @NonNull String[] permissions,
-                                                @NonNull int[] grantResults, PermissionGrant permissionGrant) {
+    public static void requestPermissionsResult(final Activity activity, final int requestCode,
+                                                @NonNull String[] permissions,
+                                                @NonNull int[] grantResults, PermissionGrant
+                                                        permissionGrant) {
 
         if (activity == null) {
             return;
@@ -232,7 +251,8 @@ public class PermissionUtils {
             return;
         }
 
-        Log.i(TAG, "onRequestPermissionsResult requestCode:" + requestCode + ",permissions:" + permissions.toString()
+        Log.i(TAG, "onRequestPermissionsResult requestCode:" + requestCode + ",permissions:" +
+                permissions.toString()
                 + ",grantResults:" + grantResults.toString() + ",length:" + grantResults.length);
 
         if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -266,10 +286,13 @@ public class PermissionUtils {
 
     /**
      * @param activity
-     * @param isShouldRationale true: return no granted and shouldShowRequestPermissionRationale permissions, false:return no granted and !shouldShowRequestPermissionRationale
+     * @param isShouldRationale true: return no granted and shouldShowRequestPermissionRationale
+     *                          permissions, false:return no granted and
+     *                          !shouldShowRequestPermissionRationale
      * @return
      */
-    public static ArrayList<String> getNoGrantedPermission(Activity activity, boolean isShouldRationale) {
+    public static ArrayList<String> getNoGrantedPermission(Activity activity, boolean
+            isShouldRationale) {
 
         ArrayList<String> permissions = new ArrayList<>();
 
@@ -289,7 +312,8 @@ public class PermissionUtils {
             }
 
             if (checkSelfPermission != PackageManager.PERMISSION_GRANTED) {
-                Log.i(TAG, "getNoGrantedPermission ActivityCompat.checkSelfPermission != PackageManager.PERMISSION_GRANTED:" + requestPermission);
+                Log.i(TAG, "getNoGrantedPermission ActivityCompat.checkSelfPermission != " +
+                        "PackageManager.PERMISSION_GRANTED:" + requestPermission);
 
                 if (ActivityCompat.shouldShowRequestPermissionRationale(activity, requestPermission)) {
                     Log.d(TAG, "shouldShowRequestPermissionRationale if");

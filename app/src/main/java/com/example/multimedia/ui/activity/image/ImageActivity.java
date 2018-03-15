@@ -26,6 +26,7 @@ public class ImageActivity extends ListActivity {
         mTaskList.add("使用Camera1 API 进行图像拍摄(SurfaceView 预览)");
         mTaskList.add("使用Camera1 API 进行图像拍摄(TextureView 预览)");
         mTaskList.add("使用Camera2 API 进行图像拍摄");
+        mTaskList.add("OpenGLES － 绘制一个三角形");
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mTaskList);
         setListAdapter(adapter);
     }
@@ -49,6 +50,9 @@ public class ImageActivity extends ListActivity {
                 break;
             case 4:
                 mIntent.setClass(this, Camera2SurfaceActivity.class);
+                break;
+            case 5:
+                mIntent.setClass(this, SimpleOpenGLActivity.class);
                 break;
             default:
                 return;

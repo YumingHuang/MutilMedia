@@ -202,7 +202,8 @@ public class Camera1RecordActivity extends BaseActivity implements View.OnClickL
             mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
 
             //创建录音文件
-            mVideoRecordFile = new File(Constants.VIDEO_PATH + System.currentTimeMillis() + Constants.VIDEO_MP4);
+            mVideoRecordFile = new File(Constants.VIDEO_PATH + System.currentTimeMillis() + Constants
+                    .VIDEO_MP4);
             if (!mVideoRecordFile.getParentFile().exists()) {
                 mVideoRecordFile.getParentFile().mkdirs();
             }
@@ -223,54 +224,51 @@ public class Camera1RecordActivity extends BaseActivity implements View.OnClickL
 
     public void initCamera() {
         //默认开启后置
-        mCamera = Camera.open();
-
+        if (mCamera == null) {
+            mCamera = Camera.open();
+            //摄像头进行旋转90°
+             mCamera.setDisplayOrientation(90);
+            Log.d(TAG, "camera.open");
+        }
         if (mCamera != null) {
-            if (mCamera == null) {
-                mCamera = Camera.open();
-                //摄像头进行旋转90°
-                mCamera.setDisplayOrientation(90);
-                Log.d(TAG, "camera.open");
-            }
-            if (mCamera != null) {
-                try {
-                    CameraSizeComparator sizeComparator = new CameraSizeComparator();
-                    Camera.Parameters parameters = mCamera.getParameters();
+            try {
+                CameraSizeComparator sizeComparator = new CameraSizeComparator();
+                Camera.Parameters parameters = mCamera.getParameters();
 
-                    if (mSize == null) {
-                        List<Camera.Size> vSizeList = parameters.getSupportedPreviewSizes();
-                        Collections.sort(vSizeList, sizeComparator);
+                if (mSize == null) {
+                    List<Camera.Size> vSizeList = parameters.getSupportedPreviewSizes();
+                    Collections.sort(vSizeList, sizeComparator);
 
-                        for (int num = 0; num < vSizeList.size(); num++) {
-                            Camera.Size size = vSizeList.get(num);
+                    for (int num = 0; num < vSizeList.size(); num++) {
+                        Camera.Size size = vSizeList.get(num);
 
-                            if (size.width >= 800 && size.height >= 480) {
-                                this.mSize = size;
-                                break;
-                            }
+                        if (size.width >= 800 && size.height >= 480) {
+                            this.mSize = size;
+                            break;
                         }
-                        mSize = vSizeList.get(0);
-
-                        List<String> focusModesList = parameters.getSupportedFocusModes();
-
-                        //增加对聚焦模式的判断
-                        if (focusModesList.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
-                            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-                        } else if (focusModesList.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-                            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-                        }
-                        mCamera.setParameters(parameters);
                     }
-                    mCamera.setPreviewDisplay(mSurfaceHolder);
-                    mCamera.startPreview();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(Camera1RecordActivity.this, "初始化相机错误",
-                            Toast.LENGTH_SHORT).show();
+                    mSize = vSizeList.get(0);
+
+                    List<String> focusModesList = parameters.getSupportedFocusModes();
+
+                    //增加对聚焦模式的判断
+                    if (focusModesList.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+                        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                    } else if (focusModesList.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+                        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+                    }
+                    mCamera.setParameters(parameters);
                 }
+                mCamera.setPreviewDisplay(mSurfaceHolder);
+                mCamera.startPreview();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(Camera1RecordActivity.this, "初始化相机错误",
+                        Toast.LENGTH_SHORT).show();
             }
         }
     }
+
 
     private void stopRecord() {
         try {
