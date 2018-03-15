@@ -1,5 +1,6 @@
 package com.example.multimedia.ui.activity.image;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
@@ -17,8 +18,11 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.multimedia.R;
+import com.example.multimedia.common.Constants;
 import com.example.multimedia.ui.activity.BaseActivity;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -258,9 +262,34 @@ public class Camera1TextureActivity extends BaseActivity implements View.OnClick
                 mTextureView.setVisibility(View.GONE);
                 Toast.makeText(Camera1TextureActivity.this, "拍照", Toast.LENGTH_SHORT).show();
                 mShowImage.setImageBitmap(bitmap);
+                saveBitmap(Camera1TextureActivity.this, bitmap);
             }
         }
     };
+
+    /**
+     * 保存bitmap到本地
+     *
+     * @param context
+     * @param mBitmap
+     */
+    public static void saveBitmap(Context context, Bitmap mBitmap) {
+        String savePath;
+        File filePic;
+        try {
+            filePic = new File(Constants.IMAGE_PATH + System.currentTimeMillis() + Constants.IMAGE_JPG);
+            if (!filePic.exists()) {
+                filePic.getParentFile().mkdirs();
+                filePic.createNewFile();
+            }
+            FileOutputStream fos = new FileOutputStream(filePic);
+            mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 判断摄像头是否可用

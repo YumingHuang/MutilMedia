@@ -16,4 +16,8 @@ public class Constants {
     public static final String AUDIO_WAV = ".wav";
     /*** 音频m4a格式 */
     public static final String AUDIO_M4A = ".m4a";
+    /*** 图片jpg格式 */
+    public static final String IMAGE_JPG = ".jpg";
+    /*** 视频mp4格式 */
+    public static final String VIDEO_MP4 = ".mp4";
 }

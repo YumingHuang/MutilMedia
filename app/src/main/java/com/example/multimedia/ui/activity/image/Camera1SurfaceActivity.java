@@ -1,5 +1,6 @@
 package com.example.multimedia.ui.activity.image;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
@@ -14,8 +15,11 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.multimedia.R;
+import com.example.multimedia.common.Constants;
 import com.example.multimedia.ui.activity.BaseActivity;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -108,7 +112,6 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
      * 初始化相机
      */
     private void initCamera() {
-        releaseCamera();
         //默认开启后置
         mCamera = Camera.open();
         //摄像头进行旋转90°
@@ -129,6 +132,12 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
                 parameters.setPictureSize(mViewWidth, mViewHeight);
                 //通过SurfaceView显示预览
                 mCamera.setPreviewDisplay(mSurfaceHolder);
+                mCamera.setPreviewCallback(new Camera.PreviewCallback() {
+                    @Override
+                    public void onPreviewFrame(byte[] data, Camera camera) {
+                        Log.d(TAG, "onPreviewFrame");
+                    }
+                });
                 //开始预览
                 mCamera.startPreview();
             } catch (IOException e) {
@@ -142,6 +151,8 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
      */
     private void releaseCamera() {
         if (mCamera != null) {
+            //中止预览回调，然后再释放camera更安全,否则可能会报错
+            mCamera.setPreviewCallback(null);
             mCamera.stopPreview();
             mCamera.release();
         }
@@ -203,7 +214,32 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
                 mSurfaceView.setVisibility(View.GONE);
                 Toast.makeText(Camera1SurfaceActivity.this, "拍照", Toast.LENGTH_SHORT).show();
                 mShowImage.setImageBitmap(bitmap);
+                saveBitmap(Camera1SurfaceActivity.this, bitmap);
             }
         }
     };
+
+    /**
+     * 保存bitmap到本地
+     *
+     * @param context
+     * @param mBitmap
+     */
+    public static void saveBitmap(Context context, Bitmap mBitmap) {
+        String savePath;
+        File filePic;
+        try {
+            filePic = new File(Constants.IMAGE_PATH + System.currentTimeMillis() + Constants.IMAGE_JPG);
+            if (!filePic.exists()) {
+                filePic.getParentFile().mkdirs();
+                filePic.createNewFile();
+            }
+            FileOutputStream fos = new FileOutputStream(filePic);
+            mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

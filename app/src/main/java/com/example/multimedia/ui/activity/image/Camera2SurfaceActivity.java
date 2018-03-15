@@ -6,8 +6,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
-import android.graphics.Matrix;
-import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -31,8 +29,12 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.multimedia.R;
+import com.example.multimedia.common.Constants;
 import com.example.multimedia.ui.activity.BaseActivity;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -52,7 +54,6 @@ public class Camera2SurfaceActivity extends BaseActivity implements View.OnClick
 
     private SurfaceView mSurfaceView;
     private SurfaceHolder mSurfaceHolder;
-    private Camera mCamera;
     private ImageView mShowImage;
     private CameraManager mCameraManager;
     private Handler mChildHandler, mMainHandler;
@@ -139,6 +140,7 @@ public class Camera2SurfaceActivity extends BaseActivity implements View.OnClick
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 if (bitmap != null) {
                     mShowImage.setImageBitmap(bitmap);
+                    saveBitmap(Camera2SurfaceActivity.this, bitmap);
                 }
             }
         }, mMainHandler);
@@ -298,6 +300,30 @@ public class Camera2SurfaceActivity extends BaseActivity implements View.OnClick
             CaptureRequest mCaptureRequest = captureRequestBuilder.build();
             mCameraCaptureSession.capture(mCaptureRequest, null, mChildHandler);
         } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 保存bitmap到本地
+     *
+     * @param context
+     * @param mBitmap
+     */
+    public static void saveBitmap(Context context, Bitmap mBitmap) {
+        String savePath;
+        File filePic;
+        try {
+            filePic = new File(Constants.IMAGE_PATH + System.currentTimeMillis() + Constants.IMAGE_JPG);
+            if (!filePic.exists()) {
+                filePic.getParentFile().mkdirs();
+                filePic.createNewFile();
+            }
+            FileOutputStream fos = new FileOutputStream(filePic);
+            mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
