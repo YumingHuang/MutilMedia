@@ -24,9 +24,9 @@ import java.util.Map;
 /**
  * 申请权限工具类代码
  */
-public class PermissionUtils {
+public class PermissionUtil {
 
-    private static final String TAG = PermissionUtils.class.getSimpleName();
+    private static final String TAG = PermissionUtil.class.getSimpleName();
     public static final int CODE_RECORD_AUDIO = 0;
     public static final int CODE_GET_ACCOUNTS = 1;
     public static final int CODE_READ_PHONE_STATE = 2;
@@ -73,7 +73,7 @@ public class PermissionUtils {
      *
      * @param activity
      * @param requestCode request code, e.g. if you need request CAMERA permission,parameters is
-     *                    PermissionUtils.CODE_CAMERA
+     *                    PermissionUtil.CODE_CAMERA
      */
     public static void requestPermission(final Activity activity, final int requestCode,
                                          PermissionGrant permissionGrant) {

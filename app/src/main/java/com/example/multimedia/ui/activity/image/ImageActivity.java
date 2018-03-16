@@ -52,7 +52,7 @@ public class ImageActivity extends ListActivity {
                 mIntent.setClass(this, Camera2SurfaceActivity.class);
                 break;
             case 5:
-                mIntent.setClass(this, SimpleOpenGLActivity.class);
+                mIntent.setClass(this, SimpleOpenGlActivity.class);
                 break;
             default:
                 return;
