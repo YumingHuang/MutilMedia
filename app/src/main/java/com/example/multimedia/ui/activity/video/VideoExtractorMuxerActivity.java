@@ -166,6 +166,7 @@ public class VideoExtractorMuxerActivity extends BaseActivity implements View.On
             long videoSampleTime;
             //获取每帧的之间的时间
             {
+                //读取一帧数据
                 mMediaExtractor.readSampleData(byteBuffer, 0);
                 //skip first I frame
                 if (mMediaExtractor.getSampleFlags() == MediaExtractor.SAMPLE_FLAG_SYNC) {
@@ -259,6 +260,8 @@ public class VideoExtractorMuxerActivity extends BaseActivity implements View.On
                 bufferInfo.flags = mMediaExtractor.getSampleFlags();
                 bufferInfo.offset = 0;
                 bufferInfo.presentationTimeUs += stampTime;
+                // 直接使用getSampleTime?
+                // bufferInfo.presentationTimeUs = mMediaExtractor.getSampleTime();
 
                 mMediaMuxer.writeSampleData(writeAudioIndex, byteBuffer, bufferInfo);
             }
