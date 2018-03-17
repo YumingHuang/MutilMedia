@@ -34,6 +34,7 @@
         <activity android:name="com.example.multimedia.ui.activity.image.Camera2SurfaceActivity" />
         <activity android:name="com.example.multimedia.ui.activity.image.LargeImageViewActivity" />
         <activity android:name="com.example.multimedia.ui.activity.image.SimpleOpenGlActivity" />
+        <activity android:name="com.example.multimedia.ui.activity.image.SimpleJniActivity" />
         <activity android:name="com.example.multimedia.ui.activity.audio.AudioActivity" />
         <activity android:name="com.example.multimedia.ui.activity.audio.MediaRecordActivity" />
         <activity android:name="com.example.multimedia.ui.activity.audio.AudioPcmRecordActivity" />

@@ -33,7 +33,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         //定义一个三角形
         mTriangle = new TriangleV2();
         //定义一个正方形
-     //   mSquare = new SquareV2();
+        mSquare = new SquareV2();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         float ratio = (float) width / height;
 
         // 投影矩阵应用在坐标系中,当onDrawFrame方向调用时 ,投影矩阵调整坐标系统
-         Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
     }
 
     @Override
@@ -56,13 +56,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // Set the camera position (View matrix) 创建一个模拟摄像机观察变换位置
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 7, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 4, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
         // 计算投影及视图变化
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
         // 绘制正方形
-     //   mSquare.draw(mMVPMatrix);
+        mSquare.draw(mMVPMatrix);
 
         // 创建一个旋转三角形
 
@@ -71,7 +71,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // long time = SystemClock.uptimeMillis() % 4000L;
         // float angle = 0.090f * ((int) time);
 
-       // Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
+        Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
 
         // Combine the rotation matrix with the projection and camera view
         // Note that the mMVPMatrix factor *must be first* in order
