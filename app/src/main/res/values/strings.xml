@@ -5,6 +5,10 @@
     <string name="audio_btn_stop_record">stop record</string>
     <string name="audio_btn_start_play">start play</string>
     <string name="audio_btn_stop_play">stop play</string>
+    <string name="audio_btn_start_encode">start encode</string>
+    <string name="audio_btn_start_decode">start decode</string>
+    <string name="audio_btn_encoding">encoding</string>
+    <string name="audio_btn_decoding">decoding</string>
 
     <string name="image_btn_start_take">take picture</string>
 

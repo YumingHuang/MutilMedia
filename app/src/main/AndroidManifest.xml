@@ -39,8 +39,10 @@
         <activity android:name="com.example.multimedia.ui.activity.audio.MediaRecordActivity" />
         <activity android:name="com.example.multimedia.ui.activity.audio.AudioPcmRecordActivity" />
         <activity android:name="com.example.multimedia.ui.activity.audio.AudioWavRecordActivity" />
+        <activity android:name="com.example.multimedia.ui.activity.audio.AudioMediaCodecActivity" />
         <activity android:name="com.example.multimedia.ui.activity.video.VideoActivity" />
         <activity android:name="com.example.multimedia.ui.activity.video.Camera1RecordActivity" />
         <activity android:name="com.example.multimedia.ui.activity.video.VideoExtractorMuxerActivity" />
+        <activity android:name="com.example.multimedia.ui.activity.video.VideoMediaCodecActivity" />
     </application>
 </manifest>
