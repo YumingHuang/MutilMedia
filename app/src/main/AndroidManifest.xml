@@ -43,6 +43,7 @@
         <activity android:name="com.example.multimedia.ui.activity.video.VideoActivity" />
         <activity android:name="com.example.multimedia.ui.activity.video.Camera1RecordActivity" />
         <activity android:name="com.example.multimedia.ui.activity.video.VideoExtractorMuxerActivity" />
-        <activity android:name="com.example.multimedia.ui.activity.video.VideoMediaCodecActivity" />
+        <activity android:name="com.example.multimedia.ui.activity.video.VideoYUVToH264Activity" />
+        <activity android:name="com.example.multimedia.ui.activity.video.VideoParseH264Activity" />
     </application>
 </manifest>
