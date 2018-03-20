@@ -57,7 +57,7 @@ public class Camera2SurfaceActivity extends BaseActivity implements View.OnClick
     private ImageView mShowImage;
     private CameraManager mCameraManager;
     private Handler mChildHandler, mMainHandler;
-    /*** 摄像头Id 0 为后  1 为前 */
+    /*** 摄像头Id ,0为后 1为前 */
     private String mCameraID;
     private ImageReader mImageReader;
     private CameraCaptureSession mCameraCaptureSession;
@@ -78,12 +78,10 @@ public class Camera2SurfaceActivity extends BaseActivity implements View.OnClick
      */
     private void initView() {
         mShowImage = findViewById(R.id.iv_show_camera2_activity);
-        //mSurfaceView
         mSurfaceView = findViewById(R.id.surface_view_camera2_activity);
         mSurfaceHolder = mSurfaceView.getHolder();
         // mSurfaceView 不需要自己的缓冲区
         mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        // mSurfaceView添加回调
         mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
@@ -122,6 +120,7 @@ public class Camera2SurfaceActivity extends BaseActivity implements View.OnClick
         mMainHandler = new Handler(getMainLooper());
         //后摄像头
         mCameraID = "" + CameraCharacteristics.LENS_FACING_FRONT;
+        //直接访问呈现表面的图像数据
         mImageReader = ImageReader.newInstance(1080, 1920, ImageFormat.JPEG, 1);
         mImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
             @Override
@@ -138,6 +137,7 @@ public class Camera2SurfaceActivity extends BaseActivity implements View.OnClick
                 //由缓冲区存入字节数组
                 buffer.get(bytes);
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                Toast.makeText(Camera2SurfaceActivity.this, "拍照成功", Toast.LENGTH_SHORT).show();
                 if (bitmap != null) {
                     mShowImage.setImageBitmap(bitmap);
                     saveBitmap(Camera2SurfaceActivity.this, bitmap);
@@ -285,6 +285,7 @@ public class Camera2SurfaceActivity extends BaseActivity implements View.OnClick
         // 创建拍照需要的CaptureRequest.Builder
         final CaptureRequest.Builder captureRequestBuilder;
         try {
+            // image capture请求 ,区别于上面camera preview请求
             captureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             // 将imageReader的surface作为CaptureRequest.Builder的目标
             captureRequestBuilder.addTarget(mImageReader.getSurface());
@@ -312,14 +313,14 @@ public class Camera2SurfaceActivity extends BaseActivity implements View.OnClick
      */
     public static void saveBitmap(Context context, Bitmap mBitmap) {
         String savePath;
-        File filePic;
+        File picFile;
         try {
-            filePic = new File(Constants.IMAGE_PATH + System.currentTimeMillis() + Constants.IMAGE_JPG);
-            if (!filePic.exists()) {
-                filePic.getParentFile().mkdirs();
-                filePic.createNewFile();
+            picFile = new File(Constants.IMAGE_PATH + System.currentTimeMillis() + Constants.IMAGE_JPG);
+            if (!picFile.exists()) {
+                picFile.getParentFile().mkdirs();
+                picFile.createNewFile();
             }
-            FileOutputStream fos = new FileOutputStream(filePic);
+            FileOutputStream fos = new FileOutputStream(picFile);
             mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.flush();
             fos.close();

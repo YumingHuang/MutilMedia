@@ -27,18 +27,18 @@ import java.io.IOException;
  */
 public class Camera1SurfaceActivity extends BaseActivity implements View.OnClickListener {
 
-    private SurfaceView mSurfaceView;
-    private SurfaceHolder mSurfaceHolder;
     private Camera mCamera;
     private ImageView mShowImage;
+    private SurfaceView mSurfaceView;
+    private SurfaceHolder mSurfaceHolder;
     /*** mSurfaceView的宽和高 */
     private int mViewWidth, mViewHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_image_camera1_surface);
+
         initView();
         if (!isCameraCanUse()) {
             finish();
@@ -46,12 +46,8 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
         }
     }
 
-    /**
-     * 初始化控件
-     */
     private void initView() {
         mShowImage = findViewById(R.id.iv_show_camera1_activity);
-        //mSurfaceView
         mSurfaceView = findViewById(R.id.surface_view_camera1_activity);
         mSurfaceHolder = mSurfaceView.getHolder();
         // mSurfaceView 不需要自己的缓冲区
@@ -108,47 +104,41 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
         return canUse;
     }
 
-    /**
-     * 初始化相机
-     */
     private void initCamera() {
         //默认开启后置
         mCamera = Camera.open();
         //摄像头进行旋转90°
         mCamera.setDisplayOrientation(90);
         if (mCamera != null) {
+            Camera.Parameters parameters = mCamera.getParameters();
+            //设置预览照片的大小
+            parameters.setPreviewFpsRange(mViewWidth, mViewHeight);
+            //设置相机预览照片帧数
+            parameters.setPreviewFpsRange(4, 10);
+            //设置图片格式
+            parameters.setPictureFormat(ImageFormat.JPEG);
+            parameters.setPreviewFormat(ImageFormat.NV21);
+            //设置图片的质量
+            parameters.set("jpeg-quality", 90);
+            //设置照片的大小
+            parameters.setPictureSize(mViewWidth, mViewHeight);
+            //通过SurfaceView显示预览
             try {
-                Camera.Parameters parameters = mCamera.getParameters();
-                //设置预览照片的大小
-                parameters.setPreviewFpsRange(mViewWidth, mViewHeight);
-                //设置相机预览照片帧数
-                parameters.setPreviewFpsRange(4, 10);
-                //设置图片格式
-                parameters.setPictureFormat(ImageFormat.JPEG);
-                parameters.setPreviewFormat(ImageFormat.NV21);
-                //设置图片的质量
-                parameters.set("jpeg-quality", 90);
-                //设置照片的大小
-                parameters.setPictureSize(mViewWidth, mViewHeight);
-                //通过SurfaceView显示预览
                 mCamera.setPreviewDisplay(mSurfaceHolder);
                 mCamera.setPreviewCallback(new Camera.PreviewCallback() {
                     @Override
                     public void onPreviewFrame(byte[] data, Camera camera) {
-                        Log.d(TAG, "onPreviewFrame");
+                        Log.d(TAG, "onPreviewFrame data = " + data.length);
                     }
                 });
                 //开始预览
                 mCamera.startPreview();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    /**
-     * 释放Camera资源
-     */
     private void releaseCamera() {
         if (mCamera != null) {
             //中止预览回调，然后再释放camera更安全,否则可能会报错
@@ -169,7 +159,6 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
     /**
      * 自动对焦 对焦成功后 就进行拍照
      */
-    @SuppressWarnings("AliDeprecation")
     private Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
         @Override
         public void onAutoFocus(boolean success, Camera camera) {
@@ -189,34 +178,36 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
                         Log.d(TAG, "autoFocusCallback onPictureTaken");
                     }
                 }, pictureCallback);
+            } else {
+                Toast.makeText(Camera1SurfaceActivity.this, "对焦失败!", Toast.LENGTH_SHORT).show();
             }
         }
-    };
 
-    /**
-     * 获取图片
-     */
-    private Camera.PictureCallback pictureCallback = new Camera.PictureCallback() {
-        @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
-            Log.d(TAG, "pictureCallback onPictureTaken");
-            final Bitmap resource = BitmapFactory.decodeByteArray(data, 0, data.length);
-            if (resource == null) {
-                Toast.makeText(Camera1SurfaceActivity.this, "拍照失败", Toast.LENGTH_SHORT).show();
+        /**
+         * 图片获取回调
+         */
+        private Camera.PictureCallback pictureCallback = new Camera.PictureCallback() {
+            @Override
+            public void onPictureTaken(byte[] data, Camera camera) {
+                Log.d(TAG, "pictureCallback onPictureTaken");
+                final Bitmap resource = BitmapFactory.decodeByteArray(data, 0, data.length);
+                if (resource == null) {
+                    Toast.makeText(Camera1SurfaceActivity.this, "拍照失败", Toast.LENGTH_SHORT).show();
+                }
+                final Matrix matrix = new Matrix();
+                matrix.setRotate(90);
+                final Bitmap bitmap = Bitmap.createBitmap(resource, 0, 0, resource.getWidth(), resource
+                        .getHeight(), matrix, true);
+                if (bitmap != null && mShowImage != null && mShowImage.getVisibility() == View.GONE) {
+                    mCamera.stopPreview();
+                    mShowImage.setVisibility(View.VISIBLE);
+                    mSurfaceView.setVisibility(View.GONE);
+                    Toast.makeText(Camera1SurfaceActivity.this, "拍照成功", Toast.LENGTH_SHORT).show();
+                    mShowImage.setImageBitmap(bitmap);
+                    saveBitmap(Camera1SurfaceActivity.this, bitmap);
+                }
             }
-            final Matrix matrix = new Matrix();
-            matrix.setRotate(90);
-            final Bitmap bitmap = Bitmap.createBitmap(resource, 0, 0, resource.getWidth(), resource
-                    .getHeight(), matrix, true);
-            if (bitmap != null && mShowImage != null && mShowImage.getVisibility() == View.GONE) {
-                mCamera.stopPreview();
-                mShowImage.setVisibility(View.VISIBLE);
-                mSurfaceView.setVisibility(View.GONE);
-                Toast.makeText(Camera1SurfaceActivity.this, "拍照", Toast.LENGTH_SHORT).show();
-                mShowImage.setImageBitmap(bitmap);
-                saveBitmap(Camera1SurfaceActivity.this, bitmap);
-            }
-        }
+        };
     };
 
     /**
@@ -226,15 +217,14 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
      * @param mBitmap
      */
     public static void saveBitmap(Context context, Bitmap mBitmap) {
-        String savePath;
-        File filePic;
+        File picFile;
         try {
-            filePic = new File(Constants.IMAGE_PATH + System.currentTimeMillis() + Constants.IMAGE_JPG);
-            if (!filePic.exists()) {
-                filePic.getParentFile().mkdirs();
-                filePic.createNewFile();
+            picFile = new File(Constants.IMAGE_PATH + System.currentTimeMillis() + Constants.IMAGE_JPG);
+            if (!picFile.exists()) {
+                picFile.getParentFile().mkdirs();
+                picFile.createNewFile();
             }
-            FileOutputStream fos = new FileOutputStream(filePic);
+            FileOutputStream fos = new FileOutputStream(picFile);
             mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.flush();
             fos.close();

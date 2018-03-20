@@ -7,11 +7,8 @@ import android.view.MotionEvent;
 
 public class MoveGestureDetector extends BaseGestureDetector {
 
-    private PointF mCurrentPointer;
+    private PointF mCurPointer;
     private PointF mPrePointer;
-    //仅仅为了减少创建内存
-    private PointF mDeltaPointer = new PointF();
-
     //用于记录最终结果，并返回
     private PointF mExtenalPointer = new PointF();
 
@@ -23,8 +20,25 @@ public class MoveGestureDetector extends BaseGestureDetector {
     }
 
     @Override
+    protected void handleStartProgressEvent(MotionEvent event) {
+        int actionCode = event.getActionMasked();
+        switch (actionCode) {
+            case MotionEvent.ACTION_DOWN:
+                resetState();//防止没有接收到CANCEL or UP ,保险起见
+                mPreMotionEvent = MotionEvent.obtain(event);
+                updateStateByEvent(event);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                mGestureInProgress = mListener.onMoveBegin(this);
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
     protected void handleInProgressEvent(MotionEvent event) {
-        int actionCode = event.getAction() & MotionEvent.ACTION_MASK;
+        int actionCode = event.getActionMasked();
         switch (actionCode) {
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
@@ -45,43 +59,25 @@ public class MoveGestureDetector extends BaseGestureDetector {
     }
 
     @Override
-    protected void handleStartProgressEvent(MotionEvent event) {
-        int actionCode = event.getAction() & MotionEvent.ACTION_MASK;
-        switch (actionCode) {
-            case MotionEvent.ACTION_DOWN:
-                resetState();//防止没有接收到CANCEL or UP ,保险起见
-                mPreMotionEvent = MotionEvent.obtain(event);
-                updateStateByEvent(event);
-                break;
-            case MotionEvent.ACTION_MOVE:
-                mGestureInProgress = mListener.onMoveBegin(this);
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
     protected void updateStateByEvent(MotionEvent event) {
-        final MotionEvent prev = mPreMotionEvent;
-
+        MotionEvent prev = mPreMotionEvent;
         mPrePointer = calculateFocalPointer(prev);
-        mCurrentPointer = calculateFocalPointer(event);
+        mCurPointer = calculateFocalPointer(event);
 
-        Log.e("TAG", mPrePointer.toString() + " ,  " + mCurrentPointer);
+        Log.e("TAG", "pre = " + mPrePointer.toString() + " , cur = " + mCurPointer);
 
         boolean mSkipThisMoveEvent = prev.getPointerCount() != event.getPointerCount();
 
         Log.e("TAG", "mSkipThisMoveEvent = " + mSkipThisMoveEvent);
-        mExtenalPointer.x = mSkipThisMoveEvent ? 0 : mCurrentPointer.x - mPrePointer.x;
-        mExtenalPointer.y = mSkipThisMoveEvent ? 0 : mCurrentPointer.y - mPrePointer.y;
+        mExtenalPointer.x = mSkipThisMoveEvent ? 0 : mCurPointer.x - mPrePointer.x;
+        mExtenalPointer.y = mSkipThisMoveEvent ? 0 : mCurPointer.y - mPrePointer.y;
     }
 
     /**
      * 根据event计算多指中心点
      *
-     * @param event
-     * @return
+     * @param event event
+     * @return PointF
      */
     private PointF calculateFocalPointer(MotionEvent event) {
         final int count = event.getPointerCount();
@@ -90,10 +86,8 @@ public class MoveGestureDetector extends BaseGestureDetector {
             x += event.getX(i);
             y += event.getY(i);
         }
-
         x /= count;
         y /= count;
-
         return new PointF(x, y);
     }
 

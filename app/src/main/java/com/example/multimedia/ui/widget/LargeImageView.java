@@ -14,22 +14,19 @@ import com.example.multimedia.utils.MoveGestureDetector;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Created by zhy on 15/5/16.
- */
 public class LargeImageView extends android.support.v7.widget.AppCompatImageView {
     private BitmapRegionDecoder mDecoder;
-    /*** 图片的宽度和高度*/
     private int mImageWidth, mImageHeight;
-    /*** 绘制的区域*/
     private volatile Rect mRect = new Rect();
-    /*** 移动手势*/
     private MoveGestureDetector mDetector;
-
     private static final BitmapFactory.Options OPTIONS = new BitmapFactory.Options();
 
     static {
         OPTIONS.inPreferredConfig = Bitmap.Config.RGB_565;
+    }
+
+    public LargeImageView(Context context) {
+        this(context, null);
     }
 
     public LargeImageView(Context context, AttributeSet attrs) {
@@ -43,7 +40,7 @@ public class LargeImageView extends android.support.v7.widget.AppCompatImageView
             public boolean onMove(MoveGestureDetector detector) {
                 int moveX = (int) detector.getMoveX();
                 int moveY = (int) detector.getMoveY();
-
+                // 当宽高大于控件宽高时，根据滑动偏移量，设置显示矩形
                 if (mImageWidth > getWidth()) {
                     mRect.offset(-moveX, 0);
                     checkWidth();
@@ -87,7 +84,6 @@ public class LargeImageView extends android.support.v7.widget.AppCompatImageView
     private void checkWidth() {
         Rect rect = mRect;
         int imageWidth = mImageWidth;
-        int imageHeight = mImageHeight;
 
         if (rect.right > imageWidth) {
             rect.right = imageWidth;
@@ -103,7 +99,6 @@ public class LargeImageView extends android.support.v7.widget.AppCompatImageView
 
     private void checkHeight() {
         Rect rect = mRect;
-        int imageWidth = mImageWidth;
         int imageHeight = mImageHeight;
 
         if (rect.bottom > imageHeight) {

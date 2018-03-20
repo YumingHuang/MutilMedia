@@ -49,9 +49,6 @@ public class Camera1TextureActivity extends BaseActivity implements View.OnClick
         }
     }
 
-    /**
-     * 初始化控件
-     */
     private void initView() {
         mShowImage = findViewById(R.id.iv_show_camera1_activity);
         mTextureView = findViewById(R.id.tv_camera);
@@ -191,26 +188,26 @@ public class Camera1TextureActivity extends BaseActivity implements View.OnClick
         WindowManager windowManager = getWindowManager();
         Display defaultDisplay = windowManager.getDefaultDisplay();
         int orientation = defaultDisplay.getOrientation();
-        int degress = 0;
+        int degree = 0;
         switch (orientation) {
             case Surface.ROTATION_0:
-                degress = 0;
+                degree = 0;
                 break;
             case Surface.ROTATION_90:
-                degress = 90;
+                degree = 90;
                 break;
             case Surface.ROTATION_180:
-                degress = 180;
+                degree = 180;
                 break;
             case Surface.ROTATION_270:
-                degress = 270;
+                degree = 270;
                 break;
             default:
                 break;
         }
         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
         android.hardware.Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, cameraInfo);
-        int result = (cameraInfo.orientation - degress + 360) % 360;
+        int result = (cameraInfo.orientation - degree + 360) % 360;
         return result;
     }
 
@@ -260,7 +257,7 @@ public class Camera1TextureActivity extends BaseActivity implements View.OnClick
                 mCamera.stopPreview();
                 mShowImage.setVisibility(View.VISIBLE);
                 mTextureView.setVisibility(View.GONE);
-                Toast.makeText(Camera1TextureActivity.this, "拍照", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Camera1TextureActivity.this, "拍照成功", Toast.LENGTH_SHORT).show();
                 mShowImage.setImageBitmap(bitmap);
                 saveBitmap(Camera1TextureActivity.this, bitmap);
             }

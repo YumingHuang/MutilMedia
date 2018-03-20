@@ -26,9 +26,9 @@
         </activity>
 
         <activity android:name="com.example.multimedia.ui.activity.image.ImageActivity" />
-        <activity android:name="com.example.multimedia.ui.activity.image.DrawImgActivity" />
-        <activity android:name="com.example.multimedia.ui.activity.image.SurfaceDrawActivity" />
-        <activity android:name="com.example.multimedia.ui.activity.image.CustomImgActivity" />
+        <activity android:name="com.example.multimedia.ui.activity.image.ImageDrawActivity" />
+        <activity android:name="com.example.multimedia.ui.activity.image.SurfaceViewDrawActivity" />
+        <activity android:name="com.example.multimedia.ui.activity.image.CustomViewDrawActivity" />
         <activity android:name="com.example.multimedia.ui.activity.image.Camera1SurfaceActivity" />
         <activity android:name="com.example.multimedia.ui.activity.image.Camera1TextureActivity" />
         <activity android:name="com.example.multimedia.ui.activity.image.Camera2SurfaceActivity" />

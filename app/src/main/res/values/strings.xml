@@ -12,6 +12,8 @@
 
     <string name="image_btn_start_take">take picture</string>
 
+    <string name="un_support">No support</string>
+
     <string-array name="permissions">
         <item>@string/permission_recode_audio_hint</item>
         <item>@string/permission_get_accounts_hint</item>

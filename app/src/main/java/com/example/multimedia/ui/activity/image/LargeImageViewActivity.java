@@ -11,18 +11,20 @@ import java.io.InputStream;
 
 public class LargeImageViewActivity extends BaseActivity {
     private LargeImageView mLargeImageView;
+    private InputStream mInputStream;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_large_view);
-        mLargeImageView = (LargeImageView) findViewById(R.id.iv_large);
+        mLargeImageView = findViewById(R.id.iv_large);
         try {
-            // 省内存,这里用小图
-            InputStream inputStream = getAssets().open("cy.jpg");
-            mLargeImageView.setInputStream(inputStream);
+            mInputStream = getAssets().open("big_picture.jpg");
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if (mInputStream != null) {
+            mLargeImageView.setInputStream(mInputStream);
         }
     }
 }

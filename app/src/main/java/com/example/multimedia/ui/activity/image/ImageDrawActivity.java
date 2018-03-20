@@ -14,7 +14,7 @@ import java.util.ArrayList;
 /**
  * @author huangyuming
  */
-public class DrawImgActivity extends ListActivity {
+public class ImageDrawActivity extends ListActivity {
 
     private ArrayList<String> mTaskList = new ArrayList<>();
     private Intent mIntent = new Intent();
@@ -22,8 +22,8 @@ public class DrawImgActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mTaskList.add("SurfaceView绘制图片");
-        mTaskList.add("自定义View绘制图片");
+        mTaskList.add("使用SurfaceView绘制图片");
+        mTaskList.add("使用自定义View绘制图片");
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mTaskList);
         setListAdapter(adapter);
@@ -35,10 +35,10 @@ public class DrawImgActivity extends ListActivity {
         mIntent.putExtra(BaseActivity.TITLE, mTaskList.get(position));
         switch (position) {
             case 0:
-                mIntent.setClass(this, SurfaceDrawActivity.class);
+                mIntent.setClass(this, SurfaceViewDrawActivity.class);
                 break;
             case 1:
-                mIntent.setClass(this, CustomImgActivity.class);
+                mIntent.setClass(this, CustomViewDrawActivity.class);
                 break;
             default:
                 break;

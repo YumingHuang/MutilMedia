@@ -8,7 +8,7 @@ import com.example.multimedia.ui.activity.BaseActivity;
 /**
  * @author huangyuming
  */
-public class CustomImgActivity extends BaseActivity {
+public class CustomViewDrawActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

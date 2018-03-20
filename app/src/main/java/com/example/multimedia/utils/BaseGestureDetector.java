@@ -9,7 +9,7 @@ public abstract class BaseGestureDetector {
     protected boolean mGestureInProgress;
 
     protected MotionEvent mPreMotionEvent;
-    protected MotionEvent mCurrentMotionEvent;
+    protected MotionEvent mCurMotionEvent;
 
     protected Context mContext;
 
@@ -38,9 +38,9 @@ public abstract class BaseGestureDetector {
             mPreMotionEvent.recycle();
             mPreMotionEvent = null;
         }
-        if (mCurrentMotionEvent != null) {
-            mCurrentMotionEvent.recycle();
-            mCurrentMotionEvent = null;
+        if (mCurMotionEvent != null) {
+            mCurMotionEvent.recycle();
+            mCurMotionEvent = null;
         }
         mGestureInProgress = false;
     }
