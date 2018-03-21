@@ -1,14 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 
-    <Button
-        android:id="@+id/btn_callC"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="javaCallC"
-        android:text="javaCallC"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-</LinearLayout>
+        <Button
+            android:id="@+id/btn_invoke_void"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="invokeVoid"
+            android:text="java调用c无返回值" />
+
+        <Button
+            android:id="@+id/btn_invoke_return"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="invokeReturn"
+            android:text="java调用c有返回值" />
+
+
+        <Button
+            android:id="@+id/btn_invoke_java_filed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="invokeJavaFiled"
+            android:text="c调用java属性(Activity)" />
+
+        <Button
+            android:id="@+id/btn_invoke_java_static_filed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="invokeJavaStaticFiled"
+            android:text="c调用java静态属性(Activity)" />
+
+        <Button
+            android:id="@+id/btn_invoke_java_method"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="invokeJavaMethod"
+            android:text="c调用java方法(Activity)" />
+
+        <Button
+            android:id="@+id/btn_invoke_java_static_method"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="invokeJavaStaticMethod"
+            android:text="c调用java静态方法(Activity)" />
+
+        <Button
+            android:id="@+id/btn_invoke_java_construct_method"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="invokeJavaConstructMethod"
+            android:text="c调用java构造方法(Other)" />
+
+    </LinearLayout>
+</ScrollView>

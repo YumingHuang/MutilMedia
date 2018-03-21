@@ -7,6 +7,7 @@ import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.example.multimedia.utils.MoveGestureDetector;
@@ -60,12 +61,11 @@ public class LargeImageView extends android.support.v7.widget.AppCompatImageView
         try {
             mDecoder = BitmapRegionDecoder.newInstance(is, false);
             BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
-            // Grab the bounds for the scene dimensions
             tmpOptions.inJustDecodeBounds = true;
             BitmapFactory.decodeStream(is, null, tmpOptions);
             mImageWidth = tmpOptions.outWidth;
             mImageHeight = tmpOptions.outHeight;
-
+            Log.d("TAG", "mImageWidth = " + mImageWidth + " ,mImageHeight = " + mImageHeight);
             requestLayout();
             invalidate();
         } catch (IOException e) {
