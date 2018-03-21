@@ -31,13 +31,14 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
     private Button mRecordBtn;
     private Button mPlayBtn;
     private TextView mRecordInfo;
-    private Boolean mIsRecording = false;
-    private Boolean mIsPlaying = false;
+    private Boolean mRecording = false;
+    private Boolean mPlaying = false;
     private ExecutorService mExecutorService;
     private AudioRecord mAudioRecord;
     private File mAudioRecordFile;
     private FileOutputStream mFileOutputStream;
     private long mStartRecorderTime, mStopRecorderTime;
+    /*** 录音写入的字节数组 */
     private byte[] mBuffer;
     /***　buffer值不能太大，避免OOM　*/
     private static final int BUFFER_SIZE = 2048;
@@ -64,7 +65,7 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_record:
-                if (!mIsRecording) {
+                if (!mRecording) {
                     Log.d(TAG, "startRecord");
                     startRecord();
                 } else {
@@ -73,7 +74,7 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
                 }
                 break;
             case R.id.btn_play:
-                if (!mIsPlaying) {
+                if (!mPlaying) {
                     Log.d(TAG, "startPlay");
                     startPlay();
                 } else {
@@ -87,7 +88,6 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
     }
 
     private void startRecord() {
-        mIsRecording = true;
         mPlayBtn.setEnabled(false);
         mRecordBtn.setText(getString(R.string.audio_btn_stop_record));
         mRecordInfo.setText("");
@@ -111,8 +111,6 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
 
     private boolean doStart() {
         try {
-            //记录开始录音时间
-            mStartRecorderTime = System.currentTimeMillis();
             //创建录音文件
             mAudioRecordFile = new File(Constants.AUDIO_PATH + System.currentTimeMillis() + Constants.AUDIO_PCM);
             if (!mAudioRecordFile.getParentFile().exists()) {
@@ -121,6 +119,7 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
             mAudioRecordFile.createNewFile();
             //创建文件输出流
             mFileOutputStream = new FileOutputStream(mAudioRecordFile);
+
             //配置AudioRecord
             int audioSource = MediaRecorder.AudioSource.MIC;
             //所有android系统都支持
@@ -135,9 +134,11 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
             mAudioRecord = new AudioRecord(audioSource, sampleRate, channelConfig, audioFormat, Math.max(minBufferSize, BUFFER_SIZE));
             //开始录音
             mAudioRecord.startRecording();
-
+            mRecording = true;
+            //记录开始录音时间
+            mStartRecorderTime = System.currentTimeMillis();
             //循环读取数据，写入输出流中
-            while (mIsRecording) {
+            while (mRecording) {
                 Log.d(TAG, "recording");
                 //只要还在录音就一直读取
                 int read = mAudioRecord.read(mBuffer, 0, BUFFER_SIZE);
@@ -148,6 +149,7 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
                 }
             }
         } catch (Exception e) {
+            mRecording = false;
             e.printStackTrace();
             return false;
         } finally {
@@ -156,6 +158,21 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
             }
         }
         return true;
+    }
+
+    private void stopRecorder() {
+        mRecording = false;
+        mPlayBtn.setEnabled(true);
+        mRecordBtn.setText(getString(R.string.audio_btn_start_record));
+        //提交后台任务，停止录音
+        mExecutorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                if (!doStop()) {
+                    recorderFail();
+                }
+            }
+        });
     }
 
     /**
@@ -215,43 +232,21 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
         });
     }
 
-    /**
-     * 停止录音
-     */
-    private void stopRecorder() {
-        mIsRecording = false;
-        mPlayBtn.setEnabled(true);
-        mRecordBtn.setText(getString(R.string.audio_btn_start_record));
-        //提交后台任务，停止录音
-        mExecutorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                if (!doStop()) {
-                    recorderFail();
-                }
-            }
-        });
-    }
+    /////////////////////////////////////////////////////////
 
     private void startPlay() {
         mPlayBtn.setText(getString(R.string.audio_btn_stop_play));
         mRecordBtn.setEnabled(false);
-        Log.d(TAG, "mIsPlaying = " + mIsPlaying);
-        if (!mIsPlaying) {
-            mExecutorService.submit(new Runnable() {
-                @Override
-                public void run() {
-                    doPlay(mAudioRecordFile);
-                }
-            });
-        } else {
-            Toast.makeText(this, "正在播放", Toast.LENGTH_SHORT).show();
-        }
+        mExecutorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                doPlay(mAudioRecordFile);
+            }
+        });
     }
 
     private void doPlay(File audioFile) {
         if (audioFile != null) {
-            Log.d(TAG, "doPlay");
             //配置播放器
             //音乐类型，扬声器播放
             int streamType = AudioManager.STREAM_MUSIC;
@@ -263,10 +258,8 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
             int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
             //流模式
             int mode = AudioTrack.MODE_STREAM;
-
             //计算最小buffer大小
             int minBufferSize = AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat);
-
             //构造AudioTrack  不能小于AudioTrack的最低要求，也不能小于我们每次读的大小
             AudioTrack audioTrack = new AudioTrack(streamType, sampleRate, channelConfig, audioFormat,
                     Math.max(minBufferSize, BUFFER_SIZE), mode);
@@ -282,12 +275,9 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
             try {
                 //循环读数据，写到播放器去播放
                 inputStream = new FileInputStream(audioFile);
-
-                //循环读数据，写到播放器去播放
                 int read;
-                //只要没读完，循环播放
-                mIsPlaying = true;
-                while ((read = inputStream.read(mBuffer)) > 0 && mIsPlaying) {
+                mPlaying = true;
+                while ((read = inputStream.read(mBuffer)) > 0 && mPlaying) {
                     Log.i(TAG, "read = " + read);
                     int ret = audioTrack.write(mBuffer, 0, read);
                     //检查write的返回值，处理错误
@@ -305,20 +295,16 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
                 e.printStackTrace();
                 playFail();
             } finally {
-                //关闭文件输入流
                 if (inputStream != null) {
                     closeStream(inputStream);
                 }
-                //播放器释放
                 resetQuietly(audioTrack);
             }
-            //循环读数据，写到播放器去播放
-            //错误处理，防止闪退
         }
     }
 
     private void stopPlay() {
-        mIsPlaying = false;
+        mPlaying = false;
         mRecordInfo.setText("播放結束");
         mPlayBtn.setText(getString(R.string.audio_btn_start_play));
         mRecordBtn.setEnabled(true);
@@ -339,7 +325,12 @@ public class AudioPcmRecordActivity extends BaseActivity implements View.OnClick
 
     private void resetQuietly(AudioTrack audioTrack) {
         Log.d(TAG, "resetQuietly");
-        stopPlay();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                stopPlay();
+            }
+        });
         try {
             audioTrack.stop();
             audioTrack.release();

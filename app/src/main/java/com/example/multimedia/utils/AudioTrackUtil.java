@@ -1,18 +1,17 @@
 package com.example.multimedia.utils;
 
+import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioRecord;
 import android.media.AudioTrack;
-import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.example.multimedia.common.Constants;
+import com.example.multimedia.ui.activity.audio.AudioWavRecordActivity;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,6 +20,7 @@ public class AudioTrackUtil {
     private static AudioTrackUtil mInstance;
     private AudioTrack mAudioTrack;
     private ExecutorService mSingleThread;
+    private WeakReference<AudioWavRecordActivity> mActivity;
 
     /*** 声音播放类型 */
     private static int mStreamType = AudioManager.STREAM_MUSIC;
@@ -35,27 +35,25 @@ public class AudioTrackUtil {
     /*** 缓存的大小 */
     private static int mBufferSize = AudioTrack.getMinBufferSize(mAudioSimpleRate, mAudioChannel, mAudioFormat);
     /*** 记录播放状态 */
-    private boolean mIsPlaying = false;
+    private boolean mPlaying = false;
     /*** 记录是否播放失败 */
-    private boolean mIsPlayError = false;
+    private boolean mPlayError = false;
     /*** 语音播放文件 */
     private File mPlayFile;
     private byte[] mBuffer;
     /***　buffer值不能太大，避免OOM　*/
     private static final int BUFFER_SIZE = 2048;
 
-    private AudioTrackUtil() {
+    public AudioTrackUtil(AudioWavRecordActivity activity) {
+        this.mActivity = new WeakReference<>(activity);
         mBuffer = new byte[BUFFER_SIZE];
         //构造AudioTrack  不能小于AudioTrack的最低要求，也不能小于我们每次读的大小
         mAudioTrack = new AudioTrack(mStreamType, mAudioSimpleRate, mAudioChannel, mAudioFormat,
                 Math.max(mBufferSize, BUFFER_SIZE), mMode);
     }
 
-    public synchronized static AudioTrackUtil getInstance() {
-        if (mInstance == null) {
-            mInstance = new AudioTrackUtil();
-        }
-        return mInstance;
+    public void setActivityRef(AudioWavRecordActivity activity) {
+
     }
 
     /**
@@ -65,7 +63,7 @@ public class AudioTrackUtil {
         @Override
         public void run() {
             Log.d("TAG", "1--");
-            mIsPlayError = false;
+            mPlayError = false;
             try {
                 mAudioTrack.play();
             } catch (Exception e) {
@@ -79,8 +77,8 @@ public class AudioTrackUtil {
                 inputStream = new FileInputStream(mPlayFile);
                 int read;
                 //只要没读完，循环播放
-                mIsPlaying = true;
-                while ((read = inputStream.read(mBuffer)) > 0 && mIsPlaying) {
+                mPlaying = true;
+                while ((read = inputStream.read(mBuffer)) > 0 && mPlaying) {
                     Log.d("TAG", "read = " + read);
                     int ret = mAudioTrack.write(mBuffer, 0, read);
                     //检查write的返回值，处理错误
@@ -88,7 +86,7 @@ public class AudioTrackUtil {
                         case AudioTrack.ERROR_INVALID_OPERATION:
                         case AudioTrack.ERROR_BAD_VALUE:
                         case AudioManager.ERROR_DEAD_OBJECT:
-                            mIsPlayError = true;
+                            mPlayError = true;
                             return;
                         default:
                             break;
@@ -96,13 +94,16 @@ public class AudioTrackUtil {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                mIsPlayError = true;
+                mPlayError = true;
             } finally {
                 //关闭文件输入流
                 if (inputStream != null) {
                     closeStream(inputStream);
                 }
                 //TODO　播放完毕或者异常错误需要通知Activity
+                if (mActivity.get() != null) {
+                    mActivity.get().refreshPlayText();
+                }
                 resetQuietly(mAudioTrack);
             }
         }
@@ -112,7 +113,7 @@ public class AudioTrackUtil {
      * 开始播放
      */
     public void startPlay(String audioFile) {
-        mIsPlaying = true;
+        mPlaying = true;
         mPlayFile = new File(audioFile);
         mSingleThread = Executors.newSingleThreadExecutor();
         mSingleThread.submit(new WriteThread());
@@ -122,7 +123,7 @@ public class AudioTrackUtil {
      * 停止播放
      */
     public void stopPlay() {
-        mIsPlaying = false;
+        mPlaying = false;
         if (mSingleThread != null) {
             mSingleThread.shutdownNow();
         }

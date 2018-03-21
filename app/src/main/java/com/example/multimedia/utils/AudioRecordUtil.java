@@ -30,7 +30,7 @@ public class AudioRecordUtil {
     /*** 缓存的大小 */
     private static int mBufferSize = AudioRecord.getMinBufferSize(mAudioRate, mAudioChannel, mAudioFormat);
     /*** 记录播放状态 */
-    private boolean mIsRecording = false;
+    private boolean mRecording = false;
     /*** 数字信号数组 */
     private byte[] mNoteArray;
     /*** PCM文件 */
@@ -72,15 +72,22 @@ public class AudioRecordUtil {
      * 开始录音
      */
     public void startRecord() {
-        mIsRecording = true;
+        mRecording = true;
         mRecorder.startRecording();
+    }
+
+    /**
+     * 记录数据，写入文件
+     */
+    public void recordData() {
+        Executors.newSingleThreadExecutor().submit(new WriteThread());
     }
 
     /**
      * 停止录音
      */
     public void stopRecord() {
-        mIsRecording = false;
+        mRecording = false;
         mRecorder.stop();
     }
 
@@ -92,25 +99,18 @@ public class AudioRecordUtil {
         //建立文件输出流
         try {
             mOs = new BufferedOutputStream(new FileOutputStream(mPcmFile));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        while (mIsRecording) {
-            int recordSize = mRecorder.read(mNoteArray, 0, mBufferSize);
-            if (recordSize > 0) {
-                try {
-                    mOs.write(mNoteArray);
-                } catch (IOException e) {
-                    e.printStackTrace();
+
+            while (mRecording) {
+                int recordSize = mRecorder.read(mNoteArray, 0, mBufferSize);
+                if (recordSize > 0) {
+                    mOs.write(mNoteArray, 0, recordSize);
                 }
             }
-        }
-        if (mOs != null) {
-            try {
+            if (mOs != null) {
                 mOs.close();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -236,12 +236,5 @@ public class AudioRecordUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * 记录数据
-     */
-    public void recordData() {
-        Executors.newSingleThreadExecutor().submit(new WriteThread());
     }
 }

@@ -85,7 +85,7 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
             accFile.createNewFile();
             mOutputStream = new BufferedOutputStream(new FileOutputStream(accFile));
             Log.e("AudioEncoder", "outputStream initialized");
-
+            // 编解码都可以使用这个方法创建?
             mMediaCodec = MediaCodec.createByCodecName(mMediaType);
         } catch (IOException e) {
             e.printStackTrace();
@@ -93,6 +93,7 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
 
         final int[] sampleRates = {8000, 11025, 22050, 44100, 48000};
         final int[] bitRates = {64000, 96000, 128000};
+        // 编码成的目标格式
         MediaFormat mediaFormat = MediaFormat.createAudioFormat(
                 "audio/mp4a-latm", sampleRates[3], 2);
         mediaFormat.setInteger(MediaFormat.KEY_AAC_PROFILE,
@@ -374,6 +375,5 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
     }
 }

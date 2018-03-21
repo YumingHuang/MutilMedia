@@ -1,6 +1,5 @@
 package com.example.multimedia.ui.activity.audio;
 
-import android.media.AudioRecord;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,10 +10,6 @@ import com.example.multimedia.R;
 import com.example.multimedia.ui.activity.BaseActivity;
 import com.example.multimedia.utils.AudioRecordUtil;
 import com.example.multimedia.utils.AudioTrackUtil;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.concurrent.ExecutorService;
 
 /**
  * @author huangyuming
@@ -28,6 +23,7 @@ public class AudioWavRecordActivity extends BaseActivity implements View.OnClick
     private Boolean mIsPlaying = false;
     private String mPlayFilePath;
     private long mStartRecorderTime, mStopRecorderTime;
+    private AudioTrackUtil mAudioTrack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,16 +95,29 @@ public class AudioWavRecordActivity extends BaseActivity implements View.OnClick
         mRecordInfo.setText("开始播放");
         mPlayBtn.setText(getString(R.string.audio_btn_stop_play));
         mRecordBtn.setEnabled(false);
-        AudioTrackUtil.getInstance().startPlay(mPlayFilePath);
+        mAudioTrack = new AudioTrackUtil(this);
+        mAudioTrack.startPlay(mPlayFilePath);
     }
 
 
     private void stopPlay() {
-        mIsPlaying = false;
-        mRecordInfo.setText("播放結束");
-        mPlayBtn.setText(getString(R.string.audio_btn_start_play));
-        mRecordBtn.setEnabled(true);
-        AudioTrackUtil.getInstance().stopPlay();
+        refreshPlayText();
+        if (mAudioTrack != null) {
+            mAudioTrack.stopPlay();
+            mAudioTrack = null;
+        }
+    }
+
+    public void refreshPlayText() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mIsPlaying = false;
+                mRecordInfo.setText("播放結束");
+                mPlayBtn.setText(getString(R.string.audio_btn_start_play));
+                mRecordBtn.setEnabled(true);
+            }
+        });
     }
 
     @Override
