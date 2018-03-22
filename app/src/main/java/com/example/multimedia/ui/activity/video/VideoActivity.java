@@ -40,6 +40,7 @@ public class VideoActivity extends ListActivity {
                 mIntent.setClass(this, Camera1RecordActivity.class);
                 break;
             case 1:
+                mIntent.setClass(this, Camera2RecordActivity.class);
                 break;
             case 2:
                 mIntent.setClass(this, VideoExtractorMuxerActivity.class);

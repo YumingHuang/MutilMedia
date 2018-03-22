@@ -61,10 +61,6 @@ public class VideoYUVToH264Activity extends BaseActivity implements SurfaceHolde
         encode.encoderYUV420(data);
     }
 
-    private void onEncoderResult(byte[] data) {
-
-    }
-
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         startPreview();
@@ -85,7 +81,8 @@ public class VideoYUVToH264Activity extends BaseActivity implements SurfaceHolde
 
     private void startPreview() {
         if (camera == null) {
-            camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
+            camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
+            camera.setDisplayOrientation(90);
         }
 
         try {

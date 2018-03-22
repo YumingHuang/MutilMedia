@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author huangyuming
@@ -32,7 +34,7 @@ public class VideoParseH264Activity extends BaseActivity {
 
     private SurfaceView mSurface = null;
     private SurfaceHolder mSurfaceHolder;
-    private Thread mDecodeThread;
+    private ExecutorService mDecodeThread;
     private MediaCodec mCodec;
     private boolean mStopFlag = false;
     private DataInputStream mInputStream;
@@ -58,22 +60,6 @@ public class VideoParseH264Activity extends BaseActivity {
         init();
     }
 
-    private boolean checkFile() {
-        File f = new File(filePath);
-        if (null == f || !f.exists() || f.length() == 0) {
-            Toast.makeText(this, "指定文件不存在", Toast.LENGTH_LONG).show();
-            return false;
-        }
-        try {
-            //获取文件输入流
-            mInputStream = new DataInputStream(new FileInputStream(new File(filePath)));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
     private void init() {
         if (!checkFile()) {
             return;
@@ -83,16 +69,14 @@ public class VideoParseH264Activity extends BaseActivity {
         mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
-                try
-
-                {
+                try {
                     //通过多媒体格式名创建一个可用的解码器
-                    mCodec = MediaCodec.createDecoderByType("video/avc");
+                    mCodec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_VIDEO_AVC);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                //初始化编码器
-                final MediaFormat mediaformat = MediaFormat.createVideoFormat("video/avc", Video_Width, Video_Height);
+
+                final MediaFormat mediaformat = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, Video_Width, Video_Height);
                 //获取h264中的pps及sps数据
                 if (isUsePpsAndSps) {
                     byte[] header_sps = {0, 0, 0, 1, 103, 66, 0, 42, (byte) 149, (byte) 168, 30, 0, (byte) 137, (byte) 249, 102, (byte) 224, 32, 32, 32, 64};
@@ -104,10 +88,10 @@ public class VideoParseH264Activity extends BaseActivity {
                 mediaformat.setInteger(MediaFormat.KEY_FRAME_RATE, FrameRate);
                 //https://developer.android.com/reference/android/media/MediaFormat.html#KEY_MAX_INPUT_SIZE
                 //设置配置参数，参数介绍 ：
-                // format   如果为解码器，此处表示输入数据的格式；如果为编码器，此处表示输出数据的格式。
-                //surface   指定一个surface，可用作decode的输出渲染。
-                //crypto    如果需要给媒体数据加密，此处指定一个crypto类.
-                //   flags  如果正在配置的对象是用作编码器，此处加上CONFIGURE_FLAG_ENCODE 标签。
+                // format  如果为解码器，此处表示输入数据的格式；如果为编码器，此处表示输出数据的格式。
+                // surface 指定一个surface，可用作decode的输出渲染。
+                // crypto  如果需要给媒体数据加密，此处指定一个crypto类.
+                // flags   如果正在配置的对象是用作编码器，此处加上CONFIGURE_FLAG_ENCODE 标签。
                 mCodec.configure(mediaformat, holder.getSurface(), null, 0);
                 startDecodingThread();
             }
@@ -124,24 +108,40 @@ public class VideoParseH264Activity extends BaseActivity {
         });
     }
 
+    private boolean checkFile() {
+        File f = new File(filePath);
+        if (null == f || !f.exists() || f.length() == 0) {
+            Toast.makeText(this, "指定文件不存在", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        try {
+            mInputStream = new DataInputStream(new FileInputStream(new File(filePath)));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     private void startDecodingThread() {
         mCodec.start();
-        mDecodeThread = new Thread(new decodeH264Thread());
-        mDecodeThread.start();
+        mDecodeThread = Executors.newSingleThreadExecutor();
+        mDecodeThread.execute(new DecodeH264Thread());
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
+        mDecodeThread.shutdown();
     }
 
-    private class decodeH264Thread implements Runnable {
+    private class DecodeH264Thread implements Runnable {
         @Override
         public void run() {
             try {
                 decodeLoop();
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
@@ -193,7 +193,7 @@ public class VideoParseH264Activity extends BaseActivity {
                     }
 
                     int outIndex = mCodec.dequeueOutputBuffer(info, timeoutUs);
-                    Log.d(TAG,"status flag = "+ outIndex);
+                    Log.d(TAG, "status flag = " + outIndex);
                     if (outIndex >= 0) {
                         //帧控制是不在这种情况下工作，因为没有PTS H264是可用的
                         while (info.presentationTimeUs / 1000 > System.currentTimeMillis() - startMs) {
@@ -244,12 +244,13 @@ public class VideoParseH264Activity extends BaseActivity {
             e.printStackTrace();
         }
         int[] lsp = computeLspTable(pattern);
-
-        int j = 0;  // Number of chars matched in pattern
+        // Number of chars matched in pattern
+        int j = 0;
         for (int i = start; i < remain; i++) {
             while (j > 0 && bytes[i] != pattern[j]) {
                 // Fall back in the pattern
-                j = lsp[j - 1];  // Strictly decreasing
+                // Strictly decreasing
+                j = lsp[j - 1];
             }
             if (bytes[i] == pattern[j]) {
                 // Next char matched, increment position
@@ -259,12 +260,14 @@ public class VideoParseH264Activity extends BaseActivity {
                 }
             }
         }
-        return -1;  // Not found
+        // Not found
+        return -1;
     }
 
     private int[] computeLspTable(byte[] pattern) {
         int[] lsp = new int[pattern.length];
-        lsp[0] = 0;  // Base case
+        // Base case
+        lsp[0] = 0;
         for (int i = 1; i < pattern.length; i++) {
             // Start by assuming we're extending the previous LSP
             int j = lsp[i - 1];
@@ -278,5 +281,4 @@ public class VideoParseH264Activity extends BaseActivity {
         }
         return lsp;
     }
-
 }

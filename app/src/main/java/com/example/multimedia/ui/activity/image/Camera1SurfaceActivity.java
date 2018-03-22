@@ -195,6 +195,7 @@ public class Camera1SurfaceActivity extends BaseActivity implements View.OnClick
                     Toast.makeText(Camera1SurfaceActivity.this, "拍照失败", Toast.LENGTH_SHORT).show();
                 }
                 final Matrix matrix = new Matrix();
+                // 旋转90才显示正
                 matrix.setRotate(90);
                 final Bitmap bitmap = Bitmap.createBitmap(resource, 0, 0, resource.getWidth(), resource
                         .getHeight(), matrix, true);

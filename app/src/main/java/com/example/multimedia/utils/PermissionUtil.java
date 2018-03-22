@@ -64,7 +64,7 @@ public class PermissionUtil {
             PERMISSION_WRITE_EXTERNAL_STORAGE
     };
 
-    interface PermissionGrant {
+    public interface PermissionGrant {
         void onPermissionGranted(int requestCode);
     }
 
@@ -204,14 +204,14 @@ public class PermissionUtil {
         String[] permissionsHint = activity.getResources().getStringArray(R.array.permissions);
         showMessageOKCancel(activity, "Rationale: " + permissionsHint[requestCode], new
                 DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                ActivityCompat.requestPermissions(activity,
-                        new String[]{requestPermission},
-                        requestCode);
-                Log.d(TAG, "showMessageOKCancel requestPermissions:" + requestPermission);
-            }
-        });
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ActivityCompat.requestPermissions(activity,
+                                new String[]{requestPermission},
+                                requestCode);
+                        Log.d(TAG, "showMessageOKCancel requestPermissions:" + requestPermission);
+                    }
+                });
     }
 
     private static void showMessageOKCancel(final Activity context, String message, DialogInterface

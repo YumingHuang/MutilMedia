@@ -175,12 +175,12 @@ public class MediaRecordActivity extends BaseActivity implements View.OnClickLis
             mMediaRecorder = new MediaRecorder();
             //从麦克风采集
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            //设置封装输出格式 ,需要在编码格式设置前面
+            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             //所有android系统都支持的适中采样的频率44.1kHz
             mMediaRecorder.setAudioSamplingRate(44100);
             //设置编码格式
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            //设置封装输出格式
-            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             //设置音质频率
             mMediaRecorder.setAudioEncodingBitRate(96000);
             //设置文件录音的位置

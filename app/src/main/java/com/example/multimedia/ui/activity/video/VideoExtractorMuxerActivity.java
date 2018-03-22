@@ -146,12 +146,14 @@ public class VideoExtractorMuxerActivity extends BaseActivity implements View.On
         try {
             mMediaExtractor.setDataSource(Constants.VIDEO_PATH + "input.mp4");
             int trackCount = mMediaExtractor.getTrackCount();
+            Log.d(TAG, "trackCount = " + trackCount);
             for (int i = 0; i < trackCount; i++) {
                 MediaFormat trackFormat = mMediaExtractor.getTrackFormat(i);
                 String mimeType = trackFormat.getString(MediaFormat.KEY_MIME);
                 // 取出视频的信号
                 if (mimeType.startsWith("video/")) {
                     videoIndex = i;
+                    break;
                 }
             }
             //切换道视频信号的信道
@@ -202,7 +204,7 @@ public class VideoExtractorMuxerActivity extends BaseActivity implements View.On
             mMediaExtractor.release();
             mMediaMuxer.release();
             Toast.makeText(VideoExtractorMuxerActivity.this, "分离视频成功", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "finish");
+            Log.d(TAG, "finish");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -261,7 +263,7 @@ public class VideoExtractorMuxerActivity extends BaseActivity implements View.On
                 bufferInfo.offset = 0;
                 bufferInfo.presentationTimeUs += stampTime;
                 // 直接使用getSampleTime?
-                // bufferInfo.presentationTimeUs = mMediaExtractor.getSampleTime();
+                // bufferInfo.presentationTimeUs = mMediaExtractor.getSampleTime()
 
                 mMediaMuxer.writeSampleData(writeAudioIndex, byteBuffer, bufferInfo);
             }

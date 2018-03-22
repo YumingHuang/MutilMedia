@@ -3,6 +3,7 @@ package com.example.multimedia.ui.activity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -10,6 +11,7 @@ import android.widget.ListView;
 import com.example.multimedia.ui.activity.audio.AudioActivity;
 import com.example.multimedia.ui.activity.image.ImageActivity;
 import com.example.multimedia.ui.activity.video.VideoActivity;
+import com.example.multimedia.utils.PermissionUtil;
 
 import java.util.ArrayList;
 
@@ -30,6 +32,12 @@ public class MainActivity extends ListActivity {
         mTaskList.add("直播技术");
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mTaskList);
         setListAdapter(adapter);
+        PermissionUtil.requestMultiPermissions(this, new PermissionUtil.PermissionGrant() {
+            @Override
+            public void onPermissionGranted(int requestCode) {
+                Log.d("TAG", "onPermissionGranted");
+            }
+        });
     }
 
     @Override

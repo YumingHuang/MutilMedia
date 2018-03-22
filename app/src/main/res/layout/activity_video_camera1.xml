@@ -6,41 +6,41 @@
     <SurfaceView
         android:id="@+id/sf_video"
         android:layout_width="match_parent"
-        android:layout_marginBottom="60dp"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_marginBottom="60dp" />
 
     <ImageView
         android:id="@+id/iv_perView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="60dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:src="@mipmap/ic_launcher" />
 
     <Button
         android:id="@+id/btn_start_stop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
-        android:text="@string/audio_btn_start_record"/>
+        android:layout_centerHorizontal="true"
+        android:text="@string/audio_btn_start_record" />
 
     <Button
         android:id="@+id/btn_play_video"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_marginLeft="20dp"
         android:layout_toRightOf="@id/btn_start_stop"
-        android:text="@string/audio_btn_start_play"
-        android:layout_marginLeft="20dp"/>
+        android:text="@string/audio_btn_start_play" />
 
     <TextView
         android:id="@+id/tv_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="25sp"
-        android:text="0"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="12dp"
-        android:layout_marginLeft="20dp"/>
+        android:layout_marginLeft="20dp"
+        android:text="0"
+        android:textSize="25sp" />
 
 </RelativeLayout>

@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.example.multimedia.R;
 import com.example.multimedia.common.Constants;
 import com.example.multimedia.ui.activity.BaseActivity;
+import com.example.multimedia.utils.AudioCodecUtil;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -68,6 +69,13 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
                 break;
             case R.id.btn_decode:
                 startDecode();
+
+                // MP3转码AAC
+               /* AudioCodecUtil.getInstance().setEncodeType(MediaFormat.MIMETYPE_AUDIO_AAC);
+                AudioCodecUtil.getInstance().setIOPath(Constants.AUDIO_PATH + "SleepAway.mp3",
+                        Constants.AUDIO_PATH + "SleepAway.aac");
+                AudioCodecUtil.getInstance().prepare();
+                AudioCodecUtil.getInstance().startAsync();*/
                 break;
             default:
                 break;
@@ -156,7 +164,6 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
     private void encodePCMToAAC(byte[] bytes) throws IOException {
         Log.e("AudioEncoder", bytes.length + " is coming");
 
-
         int inputBufferIndex = mMediaCodec.dequeueInputBuffer(-1);
         if (inputBufferIndex >= 0) {
             ByteBuffer inputBuffer = mInputBuffers[inputBufferIndex];
@@ -167,7 +174,6 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
 
         MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
         int outputBufferIndex = mMediaCodec.dequeueOutputBuffer(bufferInfo, 0);
-
 
         //trying to add a ADTS
         while (outputBufferIndex >= 0) {
@@ -237,17 +243,18 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
         ByteBuffer[] codecInputBuffers = mMediaCodec.getInputBuffers();
         ByteBuffer[] codecOutputBuffers = mMediaCodec.getOutputBuffers();
 
-        final long kTimeOutUs = 0;
+        final long kTimeOutUs = 10000;
         MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
         boolean sawInputEOS = false;
         boolean sawOutputEOS = false;
         int totalRawSize = 0;
         try {
             while (!sawOutputEOS) {
-                if (!sawInputEOS) {
+                while (!sawInputEOS) {
                     int inputBufIndex = mMediaCodec.dequeueInputBuffer(kTimeOutUs);
                     if (inputBufIndex >= 0) {
                         ByteBuffer dstBuf = codecInputBuffers[inputBufIndex];
+                        dstBuf.clear();
                         int sampleSize = mExtractor.readSampleData(dstBuf, 0);
                         if (sampleSize < 0) {
                             Log.i(TAG, "saw input EOS.");
@@ -259,44 +266,46 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
                             mMediaCodec.queueInputBuffer(inputBufIndex, 0, sampleSize, presentationTimeUs, 0);
                             mExtractor.advance();
                         }
+                    } else {
+                        sawInputEOS = true;
+                        break;
                     }
                 }
-                int res = mMediaCodec.dequeueOutputBuffer(info, kTimeOutUs);
-                if (res >= 0) {
-
-                    int outputBufIndex = res;
+                int outputIndex = mMediaCodec.dequeueOutputBuffer(info, kTimeOutUs);
+                if (outputIndex >= 0) {
                     // Simply ignore codec config buffers.
                     if ((info.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
                         Log.i("TAG", "audio encoder: codec config buffer");
-                        mMediaCodec.releaseOutputBuffer(outputBufIndex, false);
+                        mMediaCodec.releaseOutputBuffer(outputIndex, false);
                         continue;
                     }
-                    Log.d(TAG, "info.size = " + info.size);
+
                     if (info.size != 0) {
-                        ByteBuffer outBuf = codecOutputBuffers[outputBufIndex];
+                        ByteBuffer outBuf = codecOutputBuffers[outputIndex];
                         outBuf.position(info.offset);
                         outBuf.limit(info.offset + info.size);
-                        byte[] data = new byte[info.size];
-                        outBuf.get(data);
-                        totalRawSize += data.length;
-                        mOutputStream.write(data, 0, data.length);
-                        Log.d(TAG, "data.length = " + data.length);
+                        byte[] outputData = new byte[info.size];
+                        outBuf.get(outputData);
+                        outBuf.clear();
+                        totalRawSize += outputData.length;
+                        mOutputStream.write(outputData, 0, outputData.length);
+                        Log.d(TAG, "data.length = " + outputData.length);
                     }
 
-                    mMediaCodec.releaseOutputBuffer(outputBufIndex, false);
+                    mMediaCodec.releaseOutputBuffer(outputIndex, false);
 
                     if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                         Log.i("TAG", "saw output EOS.");
                         sawOutputEOS = true;
                     }
-                } else if (res == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+                } else if (outputIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
                     codecOutputBuffers = mMediaCodec.getOutputBuffers();
                     Log.i("TAG", "output buffers have changed.");
-                    return;
-                } else if (res == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                    MediaFormat oformat = mMediaCodec.getOutputFormat();
-                    Log.i("TAG", "output format has changed to " + oformat);
-                    return;
+                    continue;
+                } else if (outputIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                    MediaFormat format = mMediaCodec.getOutputFormat();
+                    Log.i("TAG", "output format has changed to " + format);
+                    continue;
                 }
             }
             Toast.makeText(AudioMediaCodecActivity.this, "解码成功", Toast.LENGTH_SHORT).show();
@@ -325,10 +334,8 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
             //创建文件输出流
             mOutputStream = new BufferedOutputStream(new FileOutputStream(pcmFile));
 
-            final String encodeFile = accFile.getAbsolutePath();
             mExtractor = new MediaExtractor();
-            mExtractor.setDataSource(encodeFile);
-
+            mExtractor.setDataSource(accFile.getAbsolutePath());
             // 音频文件信息
             for (int i = 0; i < mExtractor.getTrackCount(); i++) {
                 MediaFormat mediaFormat = mExtractor.getTrackFormat(i);
@@ -345,25 +352,16 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
                     mAudioInputBufferSize = minBufferSize > 0 ? minBufferSize * 4 : maxInputSize;
                     int frameSizeInBytes = audioChannels * 2;
                     mAudioInputBufferSize = (mAudioInputBufferSize / frameSizeInBytes) * frameSizeInBytes;
+                    mMediaCodec = MediaCodec.createDecoderByType(mime);
+                    mMediaCodec.configure(mediaFormat, null, null, 0);
+                    break;
                 }
             }
-            MediaFormat format = mExtractor.getTrackFormat(0);
-            String mime = format.getString(MediaFormat.KEY_MIME);
-            sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE);
-            // 声道个数：单声道或双声道
-            channels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
-            duration = format.getLong(MediaFormat.KEY_DURATION);
-            Log.d(TAG, "sampleRate = " + sampleRate + " , channels =" + channels + " , duration = " + duration);
-            if (format == null || !mime.startsWith("audio/")) {
-                Log.e(TAG, "不是音频文件 end !");
-                return false;
-            }
-            mMediaCodec = MediaCodec.createDecoderByType(mime);
             if (mMediaCodec == null) {
                 Log.e(TAG, "create mediaDecode failed");
                 return false;
             }
-            mMediaCodec.configure(format, null, null, 0);
+
             mMediaCodec.start();
         } catch (IOException e) {
             e.printStackTrace();
