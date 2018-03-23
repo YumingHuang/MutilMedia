@@ -35,18 +35,21 @@ public class TriangleV2 {
     private int mColorHandle;
     private int mMVPMatrixHandle;
 
-    // number of coordinates per vertex in this array
+    /*** number of coordinates per vertex in this array  */
     static final int COORDS_PER_VERTEX = 3;
-    static float triangleCoords[] = {
-            // in counterclockwise order:
-            0.5f, 0.5f, 0.0f,   // top
-            -0.5f, -0.53f, 0.0f,   // bottom left
-            0.5f, -0.5f, 0.0f    // bottom right
+    static float[] triangleCoords = {
+            // top
+            0.5f, 0.5f, 0.0f,
+            // bottom left
+            -0.5f, -0.5f, 0.0f,
+            // bottom right
+            0.5f, -0.5f, 0.0f
     };
-    private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+    float[] color = {0f, 0.5f, 0.5f, 0.0f};
 
-    float color[] = {0f, 0.5f, 0.5f, 0.0f};
+    private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
+    /*** vertex ByteBuffer ,4 bytes per vertex */
+    private final int vertexStride = COORDS_PER_VERTEX * 4;
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
@@ -66,17 +69,19 @@ public class TriangleV2 {
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
 
-        // prepare shaders and OpenGL program
+        // prepare shader and OpenGL program
         int vertexShader = MyGLRenderer.loadShader(
                 GLES20.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = MyGLRenderer.loadShader(
                 GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
-
-        mProgram = GLES20.glCreateProgram();             // create empty OpenGL Program
-        GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
-        GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
-        GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
-
+        // create empty OpenGL Program
+        mProgram = GLES20.glCreateProgram();
+        // add the vertex shader to program
+        GLES20.glAttachShader(mProgram, vertexShader);
+        // add the fragment shader to program
+        GLES20.glAttachShader(mProgram, fragmentShader);
+        // create OpenGL program executables
+        GLES20.glLinkProgram(mProgram);
     }
 
     /**
@@ -88,13 +93,10 @@ public class TriangleV2 {
     public void draw(float[] mvpMatrix) {
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
-
         // get handle to vertex shader's vPosition member
         mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
-
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
-
         // Prepare the triangle coordinate data
         GLES20.glVertexAttribPointer(
                 mPositionHandle, COORDS_PER_VERTEX,
@@ -103,16 +105,15 @@ public class TriangleV2 {
 
         // get handle to fragment shader's vColor member
         mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
-
         // Set color for drawing the triangle
         GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
         MyGLRenderer.checkGlError("glGetUniformLocation");
-
         // Apply the projection and view transformation
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+
         MyGLRenderer.checkGlError("glUniformMatrix4fv");
 
         // Draw the triangle

@@ -15,7 +15,6 @@ import android.widget.Toast;
 import com.example.multimedia.R;
 import com.example.multimedia.common.Constants;
 import com.example.multimedia.ui.activity.BaseActivity;
-import com.example.multimedia.utils.AudioCodecUtil;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -37,10 +36,9 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
     private String mMediaType = "OMX.google.aac.encoder";
     private ByteBuffer[] mInputBuffers = null;
     private ByteBuffer[] mOutputBuffers = null;
-    private int sampleRate = 0, channels = 0, bitrate = 0;
-    private long presentationTimeUs = 0, duration = 0;
-    private byte[] mBuffer;
-    private int mAudioInputBufferSize;
+    private long mPresentationTime;
+    private byte[] mInputBuffer;
+
     /***　buffer值不能太大，避免OOM　*/
     private static final int BUFFER_SIZE = 2048;
     public static final int KEY_CHANNEL_COUNT = 0;
@@ -58,7 +56,7 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
         mDecodeBtn = findViewById(R.id.btn_decode);
         mEncodeBtn.setOnClickListener(this);
         mDecodeBtn.setOnClickListener(this);
-        mBuffer = new byte[BUFFER_SIZE];
+        mInputBuffer = new byte[BUFFER_SIZE];
     }
 
     @Override
@@ -111,8 +109,8 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
         mMediaCodec.configure(mediaFormat, null, null,
                 MediaCodec.CONFIGURE_FLAG_ENCODE);
         mMediaCodec.start();
-        mInputBuffers = mMediaCodec.getInputBuffers();
-        mOutputBuffers = mMediaCodec.getOutputBuffers();
+        //  mInputBuffers = mMediaCodec.getInputBuffers();
+        //  mOutputBuffers = mMediaCodec.getOutputBuffers();
 
         //从文件流读数据
         FileInputStream inputStream = null;
@@ -120,8 +118,8 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
             //循环读数据，去编码
             inputStream = new FileInputStream(pcmFile);
 
-            while (inputStream.read(mBuffer) > 0) {
-                encodePCMToAAC(mBuffer);
+            while (inputStream.read(mInputBuffer) > 0) {
+                encodePCMToAAC(mInputBuffer);
             }
             Toast.makeText(AudioMediaCodecActivity.this, "編碼成功", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
@@ -166,7 +164,7 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
 
         int inputBufferIndex = mMediaCodec.dequeueInputBuffer(-1);
         if (inputBufferIndex >= 0) {
-            ByteBuffer inputBuffer = mInputBuffers[inputBufferIndex];
+            ByteBuffer inputBuffer = mMediaCodec.getInputBuffer(inputBufferIndex);
             inputBuffer.clear();
             inputBuffer.put(bytes);
             mMediaCodec.queueInputBuffer(inputBufferIndex, 0, bytes.length, 0, 0);
@@ -180,7 +178,7 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
             int outBitsSize = bufferInfo.size;
             // 7 is ADTS size
             int outPacketSize = outBitsSize + 7;
-            ByteBuffer outputBuffer = mOutputBuffers[outputBufferIndex];
+            ByteBuffer outputBuffer = mMediaCodec.getOutputBuffer(outputBufferIndex);
 
             outputBuffer.position(bufferInfo.offset);
             outputBuffer.limit(bufferInfo.offset + outBitsSize);
@@ -234,57 +232,45 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
         if (!prepareDecode()) {
             Log.d(TAG, "初始化解码器失败");
         }
-        final ByteBuffer[] buffers = mMediaCodec.getOutputBuffers();
-        int sz = buffers[0].capacity();
-        if (sz <= 0) {
-            sz = mAudioInputBufferSize;
-        }
-        byte[] mAudioOutTempBuf = new byte[sz];
-        ByteBuffer[] codecInputBuffers = mMediaCodec.getInputBuffers();
-        ByteBuffer[] codecOutputBuffers = mMediaCodec.getOutputBuffers();
 
-        final long kTimeOutUs = 10000;
         MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
         boolean sawInputEOS = false;
         boolean sawOutputEOS = false;
+        final long timeoutUs = 10000;
         int totalRawSize = 0;
         try {
             while (!sawOutputEOS) {
-                while (!sawInputEOS) {
-                    int inputBufIndex = mMediaCodec.dequeueInputBuffer(kTimeOutUs);
+                if (!sawInputEOS) {
+                    int inputBufIndex = mMediaCodec.dequeueInputBuffer(timeoutUs);
                     if (inputBufIndex >= 0) {
-                        ByteBuffer dstBuf = codecInputBuffers[inputBufIndex];
-                        dstBuf.clear();
+                        ByteBuffer dstBuf = mMediaCodec.getInputBuffer(inputBufIndex);
                         int sampleSize = mExtractor.readSampleData(dstBuf, 0);
                         if (sampleSize < 0) {
-                            Log.i(TAG, "saw input EOS.");
+                            Log.d(TAG, "saw input EOS. Stopping playback");
                             sawInputEOS = true;
-                            mMediaCodec.queueInputBuffer(inputBufIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                            sampleSize = 0;
                         } else {
-                            long presentationTimeUs = mExtractor.getSampleTime();
-                            Log.i(TAG, "presentationTimeUs.");
-                            mMediaCodec.queueInputBuffer(inputBufIndex, 0, sampleSize, presentationTimeUs, 0);
+                            mPresentationTime = mExtractor.getSampleTime();
+                        }
+
+                        mMediaCodec.queueInputBuffer(inputBufIndex, 0, sampleSize, mPresentationTime,
+                                sawInputEOS ? MediaCodec.BUFFER_FLAG_END_OF_STREAM : 0);
+
+                        if (!sawInputEOS) {
                             mExtractor.advance();
                         }
+
                     } else {
-                        sawInputEOS = true;
-                        break;
+                        Log.e(TAG, "inputBufIndex = " + inputBufIndex);
                     }
                 }
-                int outputIndex = mMediaCodec.dequeueOutputBuffer(info, kTimeOutUs);
+                int outputIndex = mMediaCodec.dequeueOutputBuffer(info, timeoutUs);
                 if (outputIndex >= 0) {
-                    // Simply ignore codec config buffers.
-                    if ((info.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
-                        Log.i("TAG", "audio encoder: codec config buffer");
-                        mMediaCodec.releaseOutputBuffer(outputIndex, false);
-                        continue;
-                    }
-
                     if (info.size != 0) {
-                        ByteBuffer outBuf = codecOutputBuffers[outputIndex];
+                        byte[] outputData = new byte[info.size];
+                        ByteBuffer outBuf = mMediaCodec.getOutputBuffer(outputIndex);
                         outBuf.position(info.offset);
                         outBuf.limit(info.offset + info.size);
-                        byte[] outputData = new byte[info.size];
                         outBuf.get(outputData);
                         outBuf.clear();
                         totalRawSize += outputData.length;
@@ -299,7 +285,6 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
                         sawOutputEOS = true;
                     }
                 } else if (outputIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
-                    codecOutputBuffers = mMediaCodec.getOutputBuffers();
                     Log.i("TAG", "output buffers have changed.");
                     continue;
                 } else if (outputIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
@@ -347,11 +332,9 @@ public class AudioMediaCodecActivity extends BaseActivity implements View.OnClic
                     int minBufferSize = AudioTrack.getMinBufferSize(audioSampleRate,
                             (audioChannels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO),
                             AudioFormat.ENCODING_PCM_16BIT);
-                    // 手动输入,不知道为什么mediaFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE) 空指针异常
-                    int maxInputSize = 8192;
-                    mAudioInputBufferSize = minBufferSize > 0 ? minBufferSize * 4 : maxInputSize;
-                    int frameSizeInBytes = audioChannels * 2;
-                    mAudioInputBufferSize = (mAudioInputBufferSize / frameSizeInBytes) * frameSizeInBytes;
+                    // 不知道为什么mediaFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE) 空指针异常
+                    Log.d(TAG, "audioChannels = " + audioChannels + " ,audioSampleRate = " + audioSampleRate + " ,minBufferSize = " + minBufferSize);
+
                     mMediaCodec = MediaCodec.createDecoderByType(mime);
                     mMediaCodec.configure(mediaFormat, null, null, 0);
                     break;

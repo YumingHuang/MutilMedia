@@ -91,11 +91,12 @@ public class VideoYUVToH264Activity extends BaseActivity implements SurfaceHolde
 
             Camera.Size previewSize = parameters.getPreviewSize();
             int size = previewSize.width * previewSize.height;
+            Log.d(TAG, "previewSize.width = " + previewSize.width + " ,previewSize.height = " + previewSize.height);
             size = size * ImageFormat.getBitsPerPixel(ImageFormat.NV21) / 8;
 
             if (encode == null) {
                 encode = new Encode(previewSize.width, previewSize.height,
-                        2000 * 1000, 15);
+                        2000 * 1000, 15, 1);
             }
 
             camera.addCallbackBuffer(new byte[size]);
@@ -129,15 +130,26 @@ public class VideoYUVToH264Activity extends BaseActivity implements SurfaceHolde
         private int videoH;
         private int videoBitrate;
         private int videoFrameRate;
+        private int frameInterval;
 
         private static final String TAG = "Encode";
         private static final String MIME = "Video/AVC";
 
-        public Encode(int videoW, int videoH, int videoBitrate, int videoFrameRate) {
+        /**
+         * 编码器
+         *
+         * @param videoW         视频的宽度
+         * @param videoH         视频的高度
+         * @param videoBitrate   比特率
+         * @param videoFrameRate 帧率
+         * @param frameInterval  关键帧
+         */
+        public Encode(int videoW, int videoH, int videoBitrate, int videoFrameRate, int frameInterval) {
             this.videoW = videoW;
             this.videoH = videoH;
             this.videoBitrate = videoBitrate;
             this.videoFrameRate = videoFrameRate;
+            this.frameInterval = frameInterval;
 
             initMediaCodec();
         }
@@ -153,7 +165,7 @@ public class VideoYUVToH264Activity extends BaseActivity implements SurfaceHolde
             format.setInteger(MediaFormat.KEY_FRAME_RATE, videoFrameRate);
             format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
                     MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible);
-            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5);
+            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, frameInterval);
 
             codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             codec.start();
@@ -170,7 +182,6 @@ public class VideoYUVToH264Activity extends BaseActivity implements SurfaceHolde
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
 
         public void encoderYUV420(byte[] input) {

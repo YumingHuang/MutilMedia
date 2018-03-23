@@ -38,22 +38,21 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
-
         // 调整视点的几何变化,如屏幕旋转
         GLES20.glViewport(0, 0, width, height);
 
         float ratio = (float) width / height;
-
-        // 投影矩阵应用在坐标系中,当onDrawFrame方向调用时 ,投影矩阵调整坐标系统
+        Log.d(TAG, "width =" + width + ", height = " + height);
+        // 锥形投影矩阵应用在坐标系中,当onDrawFrame方向调用时 ,投影矩阵调整坐标系统
         Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
-        float[] scratch = new float[16];
-
         // 画背景颜色
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+        float[] scratch = new float[16];
 
         // Set the camera position (View matrix) 创建一个模拟摄像机观察变换位置
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 4, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
