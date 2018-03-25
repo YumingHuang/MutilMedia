@@ -26,8 +26,11 @@ public class VideoActivity extends ListActivity {
         mTaskList.add("使用 MediaExtractor 和 MediaMuxer API 解析和封装mp4文件");
         mTaskList.add("使用 MediaCodec API，将YUV硬编成H264");
         mTaskList.add("使用 MediaCodec API，H264硬解");
+        mTaskList.add("使用 MediaCodec API，H264硬解");
+        mTaskList.add("串联整个音视频录制流程，完成音视频的采集、编码、封包成 mp4 输出");
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mTaskList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
+                mTaskList);
         setListAdapter(adapter);
     }
 
@@ -50,6 +53,9 @@ public class VideoActivity extends ListActivity {
                 break;
             case 4:
                 mIntent.setClass(this, VideoParseH264Activity.class);
+                break;
+            case 5:
+                mIntent.setClass(this, VideoRawRecordActivity.class);
                 break;
             default:
                 break;

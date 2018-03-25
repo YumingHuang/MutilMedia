@@ -46,5 +46,6 @@
         <activity android:name="com.example.multimedia.ui.activity.video.VideoExtractorMuxerActivity" />
         <activity android:name="com.example.multimedia.ui.activity.video.VideoYUVToH264Activity" />
         <activity android:name="com.example.multimedia.ui.activity.video.VideoParseH264Activity" />
+        <activity android:name="com.example.multimedia.ui.activity.video.VideoRawRecordActivity" />
     </application>
 </manifest>
